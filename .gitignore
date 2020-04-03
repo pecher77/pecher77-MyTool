@@ -11,8 +11,7 @@
 *.userprefs
 
 # Build results
-Debug/
-Release/
+
 
 
 # Visual Studio 2015 cache/options directory
