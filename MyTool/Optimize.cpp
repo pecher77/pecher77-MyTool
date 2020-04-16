@@ -390,7 +390,10 @@ void Get_ObjectLibrary_Info()
 					if (to_string(layer_node->Name()) == "layer")
 					{
 						ObjLibLayer* Objlayer = new ObjLibLayer;
-						Objlayer->objLayer_texture = layer_node->Attribute("texture");
+						if (layer_node->Attribute("texture") != NULL)
+						{
+							Objlayer->objLayer_texture = layer_node->Attribute("texture");
+						}
 						Objlayer->objLayer_type = layer_node->Attribute("type");
 
 						if (layer_node->Attribute("zOrder") != NULL)
