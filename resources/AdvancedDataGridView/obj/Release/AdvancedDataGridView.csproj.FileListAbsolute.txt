@@ -1,9 +1,0 @@
-C:\dev\Project10\resources\AdvancedDataGridView\bin\Release\AdvancedDataGridView.dll
-C:\dev\Project10\resources\AdvancedDataGridView\bin\Release\AdvancedDataGridView.pdb
-C:\dev\Project10\resources\AdvancedDataGridView\obj\Release\Zuby.ADGV.AdvancedDataGridViewSearchToolBar.resources
-C:\dev\Project10\resources\AdvancedDataGridView\obj\Release\Zuby.Properties.Resources.resources
-C:\dev\Project10\resources\AdvancedDataGridView\obj\Release\Zuby.ADGV.FormCustomFilter.resources
-C:\dev\Project10\resources\AdvancedDataGridView\obj\Release\AdvancedDataGridView.csproj.GenerateResource.cache
-C:\dev\Project10\resources\AdvancedDataGridView\obj\Release\AdvancedDataGridView.csproj.CoreCompileInputs.cache
-C:\dev\Project10\resources\AdvancedDataGridView\obj\Release\AdvancedDataGridView.dll
-C:\dev\Project10\resources\AdvancedDataGridView\obj\Release\AdvancedDataGridView.pdb
