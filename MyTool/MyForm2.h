@@ -1,6 +1,5 @@
 #pragma once
 #include "Details.h"
-//#include "advanceddatagridview.cs"
 
 
 
@@ -488,53 +487,53 @@ private: System::Void FillDataTable()
 			DataRow^ row = TexturesDataTable->NewRow();
 
 			row[0] = count;
-			row[1] = it.TD_to_delete;
-			row[2] = GetImageForData(msclr::interop::marshal_as<String^>(it.TD_texture_name.string())); //картинка
-			row[3] = msclr::interop::marshal_as<String^>(it.TD_texture_name.filename().string()); //имя
-			row[4] = msclr::interop::marshal_as<String^>(it.TD_texture_name.parent_path().string());//путь
+			row[1] = it->TD_to_delete;
+			row[2] = GetImageForData(MRSHL_stdstr_TO_Str(it->TD_texture_name.string())); //картинка
+			row[3] = MRSHL_stdstr_TO_Str(it->TD_texture_name.filename().string()); //имя
+			row[4] = MRSHL_stdstr_TO_Str(it->TD_texture_name.parent_path().string());//путь
 
-			String^ res = msclr::interop::marshal_as<String^>(it.TD_texture_name.string());
+			String^ res = MRSHL_stdstr_TO_Str(it->TD_texture_name.string());
 			row[5] = GetImageResolution(res);	//разрешение
 
 			std::string atlases;
 
-			if		(it.TD_GRs.size() == 1)
+			if(it->TD_GRs.size() == 1)
 			{	
-				auto& iter = it.TD_GRs.begin();
+				auto& iter = it->TD_GRs.begin();
 				atlases = (*iter)->gameFieldRes_texture_group_atlas;
-				row[6] = msclr::interop::marshal_as<String^>(atlases); //атлас
+				row[6] = MRSHL_stdstr_TO_Str(atlases); //атлас
 			}
-			else if (it.TD_GRs.size() > 1)
+			else if (it->TD_GRs.size() > 1)
 			{	
-				auto& iter = it.TD_GRs.begin();
+				auto& iter = it->TD_GRs.begin();
 				atlases = (*iter)->gameFieldRes_texture_group_atlas;
 
 				std::advance(iter, 1);
 
-				while (iter != it.TD_GRs.end())
+				while (iter != it->TD_GRs.end())
 				{
 					atlases += ", ";
 					atlases += (*iter)->gameFieldRes_texture_group_atlas;
 					std::advance(iter, 1);
 				}
 
-				row[6] = msclr::interop::marshal_as<String^>(atlases); //атлас
+				row[6] = MRSHL_stdstr_TO_Str(atlases); //атлас
 			}
-			else if (it.TD_GRs.size() == 0)
+			else if (it->TD_GRs.size() == 0)
 				row[6] = "";
 
-			row[7] = it.TD_size;
+			row[7] = it->TD_size;
 
 
-			row[8] = it.TD_GRs.size(); //в скольки объектах GR текстура
+			row[8] = it->TD_GRs.size(); //в скольки объектах GR текстура
 
-			row[9] = msclr::interop::marshal_as<String^>(it.TD_clusters_OL);
+			row[9] = MRSHL_stdstr_TO_Str(it->TD_clusters_OL);
 
 			//кол-во items
-			if (!it.TD_GRs.empty())
+			if (!it->TD_GRs.empty())
 			{	
 				int count_items = 0;
-				for (auto& gr : it.TD_GRs)
+				for (auto& gr : it->TD_GRs)
 				{
 					count_items += gr->gameFieldRes_unique_items.size();
 				}
@@ -543,10 +542,10 @@ private: System::Void FillDataTable()
 			else row[10] = 0;
 
 			//кол-во датаайди
-			if (!it.TD_GRs.empty())
+			if (!it->TD_GRs.empty())
 			{	
 				chapter_size = 0;
-				for (auto& gr : it.TD_GRs)
+				for (auto& gr : it->TD_GRs)
 				{
 					for (auto& item : gr->gameFieldRes_unique_items)
 					{
@@ -557,8 +556,8 @@ private: System::Void FillDataTable()
 			}
 			else row[11] = 0;
 
-			row[12] = it.TD_effects.size();
-			//row[13] = msclr::interop::marshal_as<String^>(it.TD_EF_exist_in_CH);
+			row[12] = it->TD_effects.size();
+			//row[13] = MRSHL_stdstr_TO_Str(it.TD_EF_exist_in_CH);
 			
 			TexturesDataTable->Rows->Add(row);
 
@@ -626,7 +625,7 @@ private: System::Void ColorDataGrid(Boolean problem)
 	for (int i = advancedDataGridView2->Rows->Count - 1; i >= 0; i--)
 	{	
 		String^ path_DG = advancedDataGridView2->Rows[i]->Cells[4]->Value->ToString() + "/" + advancedDataGridView2->Rows[i]->Cells[3]->Value->ToString();
-		fs::path dg_path = msclr::interop::marshal_as<std::string>(path_DG);
+		fs::path dg_path = MRSHL_Str_TO_stdstr(path_DG);
 			
 		if (Convert::ToBoolean(advancedDataGridView2->Rows[i]->Cells[1]->Value->ToString())) //если чекбокс
 		//if (advancedDataGridView2->Rows[i]->Cells[8]->Value->ToString()=="-" || advancedDataGridView2->Rows[i]->Cells[9]->Value == 0 || advancedDataGridView2->Rows[i]->Cells[10]->Value == 0)
@@ -665,21 +664,21 @@ private: System::Void ReNumDataTable()
 		 //удалить строку из DataTable не юзается
 private: System::Void DeleteFromDataTable(String^ texture_path)
 {
-	//std::string s_texture_path = msclr::interop::marshal_as<std::string>(texture_path);
-	fs::path f_texture_path = msclr::interop::marshal_as<std::string>(texture_path);
+	//std::string s_texture_path = MRSHL_Str_TO_stdstr(texture_path);
+	fs::path f_texture_path = MRSHL_Str_TO_stdstr(texture_path);
 
 	for (int j = TexturesDataTable->Rows->Count - 1; j >= 0; j--)
 	{
 		DataRow^ row = TexturesDataTable->Rows[j];
 		String^ path_DT = row["Path"]->ToString() + "/" + row["FileName"]->ToString();
-		fs::path dt_path = msclr::interop::marshal_as<std::string>(path_DT);
+		fs::path dt_path = MRSHL_Str_TO_stdstr(path_DT);
 
 		if (fs::equivalent(f_texture_path, dt_path))
 		{
 			TexturesDataTable->Rows->Remove(row);
 #ifdef DDDEBAG
 
-			LOG_IN_FILE(deleting_count << '\t' << "Deleted" << '\t' << "DATATABLE" << '\t' << "datatable_row" << '\t' << msclr::interop::marshal_as<std::string>(texture_path));
+			LOG_IN_FILE(deleting_count << '\t' << "Deleted" << '\t' << "DATATABLE" << '\t' << "datatable_row" << '\t' << MRSHL_Str_TO_stdstr(texture_path));
 
 #endif
 			break;
@@ -709,7 +708,6 @@ private: System::Void MyForm2_Load(System::Object^  sender, System::EventArgs^  
 		button1_cancel_del->Hide();
 	}
 	
-
 delegate System::Void Del_DisableDataGrid();
 
 public: event Del_DisableDataGrid^ ev_DisableDataGrid;
@@ -725,8 +723,6 @@ private: System::Void DeleteSelectedTextures(DoWorkEventArgs^  e)
 	label1_progress->Show();
 
 	error_counter = 0;
-
-	
 
 	LOG_IN_FILE(std::endl << std::endl << "DELETING textures and records");
 	//LOG_IN_FILE("Num"<<'\t'<<"deleting_From" << '\t' << "RESULT_del_file" << '\t' << "Texture_name" << '\t' << "path" << '\t' <<  "ID_GR" << '\t' << "ID_OL_item" << '\t' << "instanceClass");
@@ -749,19 +745,16 @@ private: System::Void DeleteSelectedTextures(DoWorkEventArgs^  e)
 			break;*/
 		if (Convert::ToBoolean(advancedDataGridView2->Rows[i]->Cells[1]->Value->ToString())) //если чекбокс удалить
 		{
-
 			deleting_count++;
 			String^ path_DG = advancedDataGridView2->Rows[i]->Cells[4]->Value->ToString() + "/" + advancedDataGridView2->Rows[i]->Cells[3]->Value->ToString();
 
 			//путь текстуры
-			std::string s_path = msclr::interop::marshal_as<std::string>(path_DG);
+			std::string s_path = MRSHL_Str_TO_stdstr(path_DG);
 			fs::path path_texture = s_path;
 
-
-			
-
 			//найти удаляемую текстуру по пути
-			TextureData* td = FindTexture(path_texture);
+			TexturePtr td = FindTexture(path_texture); //TODO +pointer но в стеке
+			int ref_count = td.use_count(); 
 			assert(td != nullptr);
 
 			//проверка есть ли на мете, если да, - то в лог и дальше
@@ -807,11 +800,8 @@ private: System::Void DeleteSelectedTextures(DoWorkEventArgs^  e)
 				{
 					LOG_IN_FILE(deleting_count << '\t' << "canceled - exists in effect: " << effect->partEff_name_p.string() << '\t' << "-" << '\t' << "texture and records" << '\t' << td->TD_texture_name.string());
 				}
-
 				continue;
 			}
-
-
 
 			//если не удаляется текстура - дальше из контейнера не удаляем
 			fs::remove(td->TD_texture_name, ec);
@@ -824,32 +814,31 @@ private: System::Void DeleteSelectedTextures(DoWorkEventArgs^  e)
 				continue;
 			}
 
-			
+			//если есть GR
 			if (!td->TD_GRs.empty())
 			{	
 				for (auto& gr : td->TD_GRs)
-				{
-					if (!gr->gameFieldRes_ObjLibLayers.empty()) //не пустые лееры
-					{
-						for (auto& layer : gr->gameFieldRes_ObjLibLayers)
-						{
-
-							DeleteFromObjectLibrary(td);
-
-							ObjLib_items.erase(layer->objLayer_item); //удалить item из контейнера
-							ObjLib_layers.erase(layer); //удалить леер из контейнера
+				{	
+					//если есть items в OL
+					if (!gr->gameFieldRes_unique_items.empty()) //не пустые лееры
+					{	
+						DeleteFromObjectLibrary(*td);  //удалить items с леерами из xml 
+						for (auto& item : gr->gameFieldRes_unique_items)
+						{	
+							for (auto& layer : item->objItem_layers)
+							{
+								ObjLib_layers.erase(layer); //удалить леер из контейнера
+							}
+							ObjLib_items.erase(item); //удалить item из контейнера 
 						}
 					}
-					DeleteFromGamefieldResources(td);
+					DeleteFromGamefieldResources(*td);
 					GameField_objects.erase(gr); //удалить gr из контейнера
 				}
 			}
 			//удаляем текстуру из контейнера
-			//auto it = std::find(textures.begin(), textures.end(), *td);
-
-			//assert(it != textures.end());
-
-			textures.erase(*td);
+			textures.erase(td);
+			assert(td.use_count() != 0);
 			//textures.erase(it); //удаление из контейнера TextureData - в деструкторе удаляется все остальное
 
 			//удаляем из advancedDataGridView2 через Invoke
@@ -873,7 +862,7 @@ private: System::Void button_delete_selected_Click(System::Object^  sender, Syst
 	String^ caption = "Deleting";
 
 	auto result = MessageBox::Show(message, caption, MessageBoxButtons::YesNo, MessageBoxIcon::Question);
-	if (result == ::DialogResult::No)
+	if (result == System::Windows::Forms::DialogResult::No)
 	{
 		return;
 	}
@@ -913,15 +902,11 @@ private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::
 
 private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e)
 {
-
 	label1_progress->Hide();
 	progressBar1->Hide();
 	button1_cancel_del->Hide();
 
-
 	RemoveEmptyFolders();
-
-
 
 	//CreateDataTable();
 	FillDataTable();
@@ -947,7 +932,7 @@ private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  send
 	
 	if (error_counter > 0)
 	{
-		MessageBox::Show("Some textures (" + error_counter + ") have not been removed. Check Log_file :" + msclr::interop::marshal_as<String^>(path_LOG), "Result");
+		MessageBox::Show("Some textures (" + error_counter + ") have not been removed. Check Log_file :" + MRSHL_stdstr_TO_Str(path_LOG), "Result");
 		return;
 	}
 	if (error_counter == 0)
@@ -1008,7 +993,6 @@ private: System::Void button_Select_Click(System::Object^  sender, System::Event
 			else
 				row->DefaultCellStyle->BackColor = Color::Honeydew;
 		}
-	
 
 }
 
@@ -1026,7 +1010,6 @@ private: System::Void button_unselect_Click(System::Object^  sender, System::Eve
 			row->DefaultCellStyle->BackColor = Color::Honeydew;
 		}
 	}
-
 }
 
 //рефреш таблицы
@@ -1044,11 +1027,7 @@ private: System::Void button_refresh_table_Click(System::Object^  sender, System
 	EditDataGrid();
 	ColorDataGrid(false);
 
-	
-
-
-
-	ColorDataGrid(true);
+	//ColorDataGrid(true);
 	loading_form->Hide();
 }
 
@@ -1058,28 +1037,28 @@ private: System::Void advancedDataGridView2_CellDoubleClick(System::Object^  sen
 	Int32 clicked_column_index = e->ColumnIndex;
 
 	String^ texture_path = advancedDataGridView2->CurrentRow->Cells[4]->Value->ToString() + "/" + advancedDataGridView2->CurrentRow->Cells[3]->Value->ToString();
-	std::string s_path = msclr::interop::marshal_as<std::string>(texture_path);
+	std::string s_path = MRSHL_Str_TO_stdstr(texture_path);
 	fs::path p_path = s_path;
-	TextureData* d = FindTexture(p_path);
-
+	TexturePtr d = FindTexture(p_path);
+	
 
 	if (clicked_column_index == 3) //имя
 	{
-		String^ fileName = msclr::interop::marshal_as<String^>(d->TD_s_texture_name);
+		String^ fileName = MRSHL_stdstr_TO_Str(d->TD_s_texture_name);
 		Process^ photoviewer = gcnew Process();
 		photoviewer->Start(fileName);
 	}
 	else if (clicked_column_index == 4) //путь
 	{
 		Process^ explorer = gcnew Process();
-		//String^ filepath = msclr::interop::marshal_as<String^>(d->TD_s_texture_name);
-		String^ filepath = msclr::interop::marshal_as<String^>(d->TD_texture_name.parent_path().string());
+		//String^ filepath = MRSHL_stdstr_TO_Str(d->TD_s_texture_name);
+		String^ filepath = MRSHL_stdstr_TO_Str(d->TD_texture_name.parent_path().string());
 		explorer->Start(filepath);
 
 	}
 	else
 	{
-		Details^ detail_form = gcnew Details(d);
+		Details^ detail_form = gcnew Details(d.get());
 		detail_form->Show();
 	}
 }
@@ -1093,7 +1072,7 @@ private: System::Void SBind_ListChanged(System::Object^ sender, ListChangedEvent
 	std::string s_count;
 	is >> s_count;
 	s_count = "Total textures: " + s_count;
-	label_total_textures->Text = msclr::interop::marshal_as<String^>(s_count);
+	label_total_textures->Text = MRSHL_stdstr_TO_Str(s_count);
 
 	int sum = 0;
 
@@ -1122,8 +1101,7 @@ public: event EventHandler^ ClosingForm2;
 
 //Событие включения/отключения датагрид
 void Onev_DisableDataGrid()
-		 {
-
+{
 			 if (!advancedDataGridView2->Enabled) {
 				 advancedDataGridView2->DefaultCellStyle->BackColor = SystemColors::Control;
 				 advancedDataGridView2->DefaultCellStyle->ForeColor = SystemColors::GrayText;
@@ -1141,7 +1119,7 @@ void Onev_DisableDataGrid()
 				 advancedDataGridView2->ReadOnly = false;
 				 advancedDataGridView2->EnableHeadersVisualStyles = true;
 			 }
-		 }
+}
 
 
 private: System::Void MyForm2_FormClosing(System::Object^  sender, System::Windows::Forms::FormClosingEventArgs^  e) 

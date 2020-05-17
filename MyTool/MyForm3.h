@@ -330,7 +330,7 @@ namespace MyTool {
 
 
 		//тип загрузки
-		String^ str2 = msclr::interop::marshal_as<String^>(label2);
+		String^ str2 = MRSHL_stdstr_TO_Str(label2);
 		MyTool::MyForm3::label2->Text = str2;
 		MyTool::MyForm3::label2->Update();
 
@@ -339,7 +339,7 @@ namespace MyTool {
 		MyTool::MyForm3::progressBar1->Value = curr_value - 1;
 
 		//тип загрузки
-		String^ str3 = msclr::interop::marshal_as<String^>(label3);
+		String^ str3 = MRSHL_stdstr_TO_Str(label3);
 		MyTool::MyForm3::label3->Text = str3;
 		MyTool::MyForm3::label3->Update();
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "chapter_editor.h"
 
+
 namespace MyTool {
 
 	using namespace System;
@@ -202,12 +203,12 @@ namespace MyTool {
 
 		Eff_Detail_CreateDataTable();
 		String^ s = effect_path;
-		std::string str_path = msclr::interop::marshal_as<std::string>(s);
+		std::string str_path = MRSHL_Str_TO_stdstr(s);
 		fs::path eff = str_path;
 
-		ParticleEffect* effect = FindEffect(eff);
+		ParticleEffectPtr effect = FindEffect(eff); //TODO copy smartpointer
 
-		label_effect_name->Text = msclr::interop::marshal_as<String^>(effect->partEff_name_s);
+		label_effect_name->Text = MRSHL_stdstr_TO_Str(effect->partEff_name_s);
 
 		
 
@@ -221,10 +222,10 @@ namespace MyTool {
 			if (eff_layer->effectLayer_file_exist == "-")
 				row[1] = GetImageForData("nofile.png");
 			else
-				row[1] = GetImageForData(msclr::interop::marshal_as<String^>(eff_layer->effectLayer_effectTexture_path_s)); //картинка
-			row[2] = msclr::interop::marshal_as<String^>(eff_layer->effectLayer_effectTexture_path_p.filename().string()); //имя
+				row[1] = GetImageForData(MRSHL_stdstr_TO_Str(eff_layer->effectLayer_effectTexture_path_s)); //картинка
+			row[2] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_effectTexture_path_p.filename().string()); //имя
 
-			row[3] = msclr::interop::marshal_as<String^>(eff_layer->effectLayer_effectTexture_path_p.parent_path().string()); //путь
+			row[3] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_effectTexture_path_p.parent_path().string()); //путь
 
 			EffectDataTable->Rows->Add(row);
 
@@ -266,7 +267,7 @@ namespace MyTool {
 		std::string s_count;
 		is >> s_count;
 		s_count = "Total textures: " + s_count;
-		label_total_effects->Text = msclr::interop::marshal_as<String^>(s_count);
+		label_total_effects->Text = MRSHL_stdstr_TO_Str(s_count);
 
 	}
 
@@ -283,7 +284,7 @@ namespace MyTool {
 	//	for (int i = advancedDataGridView1->Rows->Count - 1; i >= 0; i--)
 	//	{
 	//		//String^ path_DG = advancedDataGridView1->Rows[i]->Cells[4]->Value->ToString() + "/" + advancedDataGridView2->Rows[i]->Cells[3]->Value->ToString();
-	//		//fs::path dg_path = msclr::interop::marshal_as<std::string>(path_DG);
+	//		//fs::path dg_path = MRSHL_Str_TO_stdstr(path_DG);
 
 	//		if (advancedDataGridView1->Rows[i]->Cells[1]->Value->ToString())) //если чекбокс
 	//		//if (advancedDataGridView2->Rows[i]->Cells[8]->Value->ToString()=="-" || advancedDataGridView2->Rows[i]->Cells[9]->Value == 0 || advancedDataGridView2->Rows[i]->Cells[10]->Value == 0)
@@ -307,7 +308,7 @@ namespace MyTool {
 		std::string s_count;
 		is >> s_count;
 		s_count = "Total textures: " + s_count;
-		label_total_effects->Text = msclr::interop::marshal_as<String^>(s_count);
+		label_total_effects->Text = MRSHL_stdstr_TO_Str(s_count);
 
 
 		//ColorDataGrid(true);

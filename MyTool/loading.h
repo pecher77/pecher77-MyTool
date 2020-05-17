@@ -1,6 +1,8 @@
 #pragma once
-//#include "Optimize.h"
+
 #include "ChangeCHAttrib.h"
+#include "Optimize.h"
+#include "Core.h"
 
 namespace MyTool {
 

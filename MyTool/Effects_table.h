@@ -1,6 +1,7 @@
 #pragma once
 #include "Effect_detail.h"
 
+
 namespace MyTool {
 
 	using namespace System;
@@ -266,11 +267,11 @@ namespace MyTool {
 
 		row[0] = count;
 		row[1] = effect->partEff_to_delete;
-		row[2] = msclr::interop::marshal_as<String^>(effect->partEff_name_p.filename().string()); //имя
-		row[3] = msclr::interop::marshal_as<String^>(effect->partEff_name_p.parent_path().string()); //путь
+		row[2] = MRSHL_stdstr_TO_Str(effect->partEff_name_p.filename().string()); //имя
+		row[3] = MRSHL_stdstr_TO_Str(effect->partEff_name_p.parent_path().string()); //путь
 		row[4] = effect->partEff_ParticleEffectLayers.size(); //текстур в эффекте
-		row[5] = msclr::interop::marshal_as<String^>(effect->partEff_dead);	//мертвый ли эфеект
-		row[6] = msclr::interop::marshal_as<String^>(effect->partEff_exist_in_CH); //есть ли на мете
+		row[5] = MRSHL_stdstr_TO_Str(effect->partEff_dead);	//мертвый ли эфеект
+		row[6] = MRSHL_stdstr_TO_Str(effect->partEff_exist_in_CH); //есть ли на мете
 
 		EffectsDataTable->Rows->Add(row);
 
@@ -424,8 +425,8 @@ namespace MyTool {
 		//	if (Convert::ToBoolean(advancedDataGridViewEf->Rows[i]->Cells[1]->Value->ToString())) //если чекбокс удалить
 		//	{	
 		//		String^ path_DG = advancedDataGridViewEf->Rows[i]->Cells[3]->Value->ToString() + "/" + advancedDataGridViewEf->Rows[i]->Cells[2]->Value->ToString();
-		//		std::string s_path = msclr::interop::marshal_as<std::string>(path_DG);
-		//		std::string eff_name = msclr::interop::marshal_as<std::string>(advancedDataGridViewEf->Rows[i]->Cells[2]->Value->ToString());
+		//		std::string s_path = MRSHL_Str_TO_stdstr(path_DG);
+		//		std::string eff_name = MRSHL_Str_TO_stdstr(advancedDataGridViewEf->Rows[i]->Cells[2]->Value->ToString());
 		//		deleting_count++;
 
 		//		fs::path path_effect = s_path;
@@ -547,7 +548,7 @@ namespace MyTool {
 		//}
 		//else
 		//{
-		//	MessageBox::Show("Some effects (" + error_counter + ") have not been removed. Check Log_file :" + msclr::interop::marshal_as<String^>(path_LOG), "Result");
+		//	MessageBox::Show("Some effects (" + error_counter + ") have not been removed. Check Log_file :" + MRSHL_stdstr_TO_Str(path_LOG), "Result");
 		//}
 		
 
@@ -573,7 +574,7 @@ namespace MyTool {
 		std::string s_count;
 		is >> s_count;
 		s_count = "Total effects: " + s_count;
-		label_total_effects->Text = msclr::interop::marshal_as<String^>(s_count);
+		label_total_effects->Text = MRSHL_stdstr_TO_Str(s_count);
 
 
 		//ColorDataGrid(true);

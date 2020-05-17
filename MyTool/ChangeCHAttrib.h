@@ -1,48 +1,35 @@
 #pragma once
-#include "Optimize.h"
 
-extern bool ch_attrib_iso;
-extern bool ch_attrib_dataid;
-extern bool ch_attrib_skip_iso;
-extern bool ch_attrib_all_objects;
+namespace MyTool {
 
-extern std::string ch_attrib;
-extern std::string ch_attrib_value;
-extern std::string ch_attrib_repair;
-extern std::string ch_attrib_step;
+	double CalculateNewAttribute(double value_attr, char action, std::string value_to_change);
 
-extern char ch_attrib_operation;
+	int AttributeLength(char* start);
 
-extern std::function<std::string(std::string, std::string, std::string, char)> ReplaceInCh;
+	int AttributeLengthIso(char* start);
 
-extern std::vector<std::string> ch_attrib_ids;
+	double string_to_double(std::string attr);
 
-double CalculateNewAttribute(double value_attr, char action, std::string value_to_change);
+	std::string double_to_string(double new_attr);
 
-int AttributeLength(char* start);
+	bool valid_attribute(std::string attribute_to_change);
 
-int AttributeLengthIso(char* start);
+	void InsertIsoBlock(std::string& text);
 
-double string_to_double(std::string attr);
+	void InsertIsoAttributeFirstly(std::string& text, std::string attribute_to_change, std::string value_to_change, char action);
 
-std::string double_to_string(double new_attr);
+	std::string InsertNewIsoAttribute(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
 
-bool valid_attribute(std::string attribute_to_change);
+	std::string ReplaceInCHObjectTextIso(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
 
-void InsertIsoBlock(std::string& text);
+	std::string InsertNewAttribute(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
 
-void InsertIsoAttributeFirstly(std::string& text, std::string attribute_to_change, std::string value_to_change, char action);
+	std::string ReplaceInCHObjectText(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
 
-std::string InsertNewIsoAttribute(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
+	std::string CH_ProcessAttributeBy(std::string id, std::string attribute_to_change, std::string value_to_change, char action, std::function<std::string(std::string, std::string, std::string, char)> ReplaceInCh);
 
-std::string ReplaceInCHObjectTextIso(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
+	void CH_ProcessAttributeAllObj(std::string attribute_to_change, std::string value_to_change, char action, std::function<std::string(std::string, std::string, std::string, char)> ReplaceInCh);
 
-std::string InsertNewAttribute(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
+	std::vector<std::string> ChangeAttribute();
 
-std::string ReplaceInCHObjectText(std::string text, std::string attribute_to_change, std::string value_to_change, char action);
-
-std::string CH_ProcessAttributeBy(std::string id, std::string attribute_to_change, std::string value_to_change, char action, std::function<std::string(std::string, std::string, std::string, char)> ReplaceInCh);
-
-void CH_ProcessAttributeAllObj(std::string attribute_to_change, std::string value_to_change, char action, std::function<std::string(std::string, std::string, std::string, char)> ReplaceInCh);
-
-std::vector<std::string> ChangeAttribute();
+}

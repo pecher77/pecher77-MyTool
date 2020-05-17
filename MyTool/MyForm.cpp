@@ -1,8 +1,9 @@
+#include "pch.h"
 #include "MyForm.h"
 
 
 
-
+using namespace MyTool;
 
 [STAThreadAttribute]
 void Main(array<String^>^ args) {

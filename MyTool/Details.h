@@ -1,7 +1,6 @@
 #pragma once
-//#include "Optimize.h"
-//#include "loading.h"
 #include "Effects_table.h"
+
 
 namespace MyTool {
 
@@ -623,10 +622,10 @@ private: System::Void Fill_DataTable_GR()
 			DataRow^ row = DataTable_GR->NewRow();
 			count++;
 			row[0] = count;
-			row[1] = msclr::interop::marshal_as<String^>(gr->gameFieldRes_id); //id
-			row[2] = msclr::interop::marshal_as<String^>(gr->gameFieldRes_path_attr); //filename
-			row[3] = msclr::interop::marshal_as<String^>(gr->gameFieldRes_texture_group_atlas); //atlas
-			row[4] = msclr::interop::marshal_as<String^>(gr->gameFieldRes_path); //path
+			row[1] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_id); //id
+			row[2] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_path_attr); //filename
+			row[3] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_texture_group_atlas); //atlas
+			row[4] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_path); //path
 			DataTable_GR->Rows->Add(row);
 		}
 
@@ -662,12 +661,12 @@ private: System::Void Fill_DataTable_OL()
 			DataRow^ row = DataTable_OL->NewRow();
 			count++;
 			row[0] = count;
-			row[1] = msclr::interop::marshal_as<String^>(item->objItem_item_id); //item_id
-			row[2] = msclr::interop::marshal_as<String^>(item->objItem_instanceClass); //instanceClass
-			row[3] = msclr::interop::marshal_as<String^>(item->objItem_isIndoor); //isIndoor
-			row[4] = msclr::interop::marshal_as<String^>(item->objItem_noRedesignDeformation); //noRedesignDeformation
-			row[5] = msclr::interop::marshal_as<String^>(item->objItem_defaultZOrder); //defaultZOrder
-			row[6] = msclr::interop::marshal_as<String^>(item->objItem_cluster); //cluster
+			row[1] = MRSHL_stdstr_TO_Str(item->objItem_item_id); //item_id
+			row[2] = MRSHL_stdstr_TO_Str(item->objItem_instanceClass); //instanceClass
+			row[3] = MRSHL_stdstr_TO_Str(item->objItem_isIndoor); //isIndoor
+			row[4] = MRSHL_stdstr_TO_Str(item->objItem_noRedesignDeformation); //noRedesignDeformation
+			row[5] = MRSHL_stdstr_TO_Str(item->objItem_defaultZOrder); //defaultZOrder
+			row[6] = MRSHL_stdstr_TO_Str(item->objItem_cluster); //cluster
 			row[7] = item->objItem_layers.size(); //layers
 
 			DataTable_OL->Rows->Add(row);
@@ -708,12 +707,12 @@ private: System::Void Fill_DataTable_CH()
 				DataRow^ row = DataTable_CH->NewRow();
 				count++;
 				row[0] = count;
-				row[1] = msclr::interop::marshal_as<String^>(ch->chData_storyInfo_chapter_id); //chapter_id
-				row[2] = msclr::interop::marshal_as<String^>(ch->chData_storyInfo_repair); //repair
-				row[3] = msclr::interop::marshal_as<String^>(ch->chData_storyInfo_step); //step
-				row[4] = msclr::interop::marshal_as<String^>(ch->chData_id); //hash_id
-				row[5] = msclr::interop::marshal_as<String^>(ch->chData_text_dataid); //dataid
-				row[6] = msclr::interop::marshal_as<String^>(ch->chData_text_zOrder); //zOrder
+				row[1] = MRSHL_stdstr_TO_Str(ch->chData_storyInfo_chapter_id); //chapter_id
+				row[2] = MRSHL_stdstr_TO_Str(ch->chData_storyInfo_repair); //repair
+				row[3] = MRSHL_stdstr_TO_Str(ch->chData_storyInfo_step); //step
+				row[4] = MRSHL_stdstr_TO_Str(ch->chData_id); //hash_id
+				row[5] = MRSHL_stdstr_TO_Str(ch->chData_text_dataid); //dataid
+				row[6] = MRSHL_stdstr_TO_Str(ch->chData_text_zOrder); //zOrder
 
 				DataTable_CH->Rows->Add(row);
 			}
@@ -749,10 +748,10 @@ private: System::Void Fill_DataTable_EF()
 		DataRow^ row = DataTable_EF->NewRow();
 				count++;
 				row[0] = count;
-				row[1] = msclr::interop::marshal_as<String^>(eff->partEff_name_p.filename().string()); //filename
-				row[2] = msclr::interop::marshal_as<String^>(eff->partEff_name_p.parent_path().string()); //path
-				row[3] = msclr::interop::marshal_as<String^>(eff->partEff_exist_in_CH); //exist_in_CH
-				row[4] = msclr::interop::marshal_as<String^>(eff->partEff_dead); //dead
+				row[1] = MRSHL_stdstr_TO_Str(eff->partEff_name_p.filename().string()); //filename
+				row[2] = MRSHL_stdstr_TO_Str(eff->partEff_name_p.parent_path().string()); //path
+				row[3] = MRSHL_stdstr_TO_Str(eff->partEff_exist_in_CH); //exist_in_CH
+				row[4] = MRSHL_stdstr_TO_Str(eff->partEff_dead); //dead
 				row[5] = eff->partEff_ParticleEffectLayers.size(); //layers
 
 				DataTable_EF->Rows->Add(row);
@@ -796,7 +795,7 @@ private: System::Void EditDataGrid_EF()
 
 private: System::Void Details_Load(System::Object^  sender, System::EventArgs^  e)
 {	
-	pictureBox1->Image = GetImageForData(msclr::interop::marshal_as<String^>(texture->TD_texture_name.string()));
+	pictureBox1->Image = GetImageForData(MRSHL_stdstr_TO_Str(texture->TD_texture_name.string()));
 
 
 	if (!texture->TD_GRs.empty())
@@ -861,14 +860,14 @@ private: System::Void Details_Load(System::Object^  sender, System::EventArgs^  
 	advancedDataGridView_CH->ClearSelection();
 	advancedDataGridView_EF->ClearSelection();
 	
-	label_texture_name->Text = msclr::interop::marshal_as<String^>(texture->TD_texture_name.filename().string());
-	label_texture_path->Text = msclr::interop::marshal_as<String^>(texture->TD_texture_name.string());
-	label_resolution->Text = GetImageResolution(msclr::interop::marshal_as<String^>(texture->TD_texture_name.string()));
+	label_texture_name->Text = MRSHL_stdstr_TO_Str(texture->TD_texture_name.filename().string());
+	label_texture_path->Text = MRSHL_stdstr_TO_Str(texture->TD_texture_name.string());
+	label_resolution->Text = GetImageResolution(MRSHL_stdstr_TO_Str(texture->TD_texture_name.string()));
 	std::stringstream is;
 	is << texture->TD_size;
 	std::string s_size;
 	is >> s_size;
-	label_size->Text = msclr::interop::marshal_as<String^>(s_size);
+	label_size->Text = MRSHL_stdstr_TO_Str(s_size);
 
 }
 		
@@ -882,7 +881,7 @@ private: System::Void advancedDataGridView_EF_CellContentDoubleClick(System::Obj
 
 private: System::Void pictureBox1_DoubleClick(System::Object^  sender, System::EventArgs^  e) 
 {	
-	String^ fileName = msclr::interop::marshal_as<String^>(texture->TD_s_texture_name);
+	String^ fileName = MRSHL_stdstr_TO_Str(texture->TD_s_texture_name);
 	Process^ photoviewer = gcnew Process();
 	photoviewer->Start(fileName);
 	//FileStream^ fs = gcnew FileStream(fileName, FileMode::Open, FileAccess::Read);

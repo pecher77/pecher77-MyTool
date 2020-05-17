@@ -1,6 +1,6 @@
 #pragma once
-//#include "ChangeCH.h"
 #include "loading.h"
+
 
 namespace MyTool {
 
@@ -291,28 +291,28 @@ namespace MyTool {
 			DataRow^ row = ChapterDataTable->NewRow();
 
 			row[0] = count;
-			row[1] = msclr::interop::marshal_as<String^>(it->chData_storyInfo_chapter_id);
-			row[2] = msclr::interop::marshal_as<String^>(it->chData_storyInfo_repair);
-			row[3] = msclr::interop::marshal_as<String^>(it->chData_storyInfo_step);
-			row[4] = msclr::interop::marshal_as<String^>(it->chData_id);
-			row[5] = msclr::interop::marshal_as<String^>(it->chData_text_dataid);
-			row[6] = msclr::interop::marshal_as<String^>(it->chData_text_x);
-			row[7] = msclr::interop::marshal_as<String^>(it->chData_text_y);
-			row[8] = msclr::interop::marshal_as<String^>(it->chData_text_m);
-			row[9] = msclr::interop::marshal_as<String^>(it->chData_text_rand);
-			row[10] = msclr::interop::marshal_as<String^>(it->chData_text_zOrder);
+			row[1] = MRSHL_stdstr_TO_Str(it->chData_storyInfo_chapter_id);
+			row[2] = MRSHL_stdstr_TO_Str(it->chData_storyInfo_repair);
+			row[3] = MRSHL_stdstr_TO_Str(it->chData_storyInfo_step);
+			row[4] = MRSHL_stdstr_TO_Str(it->chData_id);
+			row[5] = MRSHL_stdstr_TO_Str(it->chData_text_dataid);
+			row[6] = MRSHL_stdstr_TO_Str(it->chData_text_x);
+			row[7] = MRSHL_stdstr_TO_Str(it->chData_text_y);
+			row[8] = MRSHL_stdstr_TO_Str(it->chData_text_m);
+			row[9] = MRSHL_stdstr_TO_Str(it->chData_text_rand);
+			row[10] = MRSHL_stdstr_TO_Str(it->chData_text_zOrder);
 			//row[11] = ""; //11 zOrder_obj
 
-			row[11] = msclr::interop::marshal_as<String^>(it->chData_ObjLibItem->objItem_defaultZOrder);//11 zOrder_instanceClass
-			row[12] = msclr::interop::marshal_as<String^>(it->chData_ObjLibItem->objItem_instanceClass);//12 instanceClass
-			row[13] = msclr::interop::marshal_as<String^>(it->chData_ObjLibItem->objItem_isIndoor);//13 OL_isIndoor
-			row[14] = msclr::interop::marshal_as<String^>(it->chData_ObjLibItem->objItem_noRedesignDeformation);//12 noRedesignDeformation
+			row[11] = MRSHL_stdstr_TO_Str(it->chData_ObjLibItem->objItem_defaultZOrder);//11 zOrder_instanceClass
+			row[12] = MRSHL_stdstr_TO_Str(it->chData_ObjLibItem->objItem_instanceClass);//12 instanceClass
+			row[13] = MRSHL_stdstr_TO_Str(it->chData_ObjLibItem->objItem_isIndoor);//13 OL_isIndoor
+			row[14] = MRSHL_stdstr_TO_Str(it->chData_ObjLibItem->objItem_noRedesignDeformation);//12 noRedesignDeformation
 
-			row[15] = msclr::interop::marshal_as<String^>(it->chData_text_iso_uL);
-			row[16] = msclr::interop::marshal_as<String^>(it->chData_text_iso_uR);
-			row[17] = msclr::interop::marshal_as<String^>(it->chData_text_iso_x);
-			row[18] = msclr::interop::marshal_as<String^>(it->chData_text_iso_y);
-			row[19] = msclr::interop::marshal_as<String^>(it->chData_text_iso_z);
+			row[15] = MRSHL_stdstr_TO_Str(it->chData_text_iso_uL);
+			row[16] = MRSHL_stdstr_TO_Str(it->chData_text_iso_uR);
+			row[17] = MRSHL_stdstr_TO_Str(it->chData_text_iso_x);
+			row[18] = MRSHL_stdstr_TO_Str(it->chData_text_iso_y);
+			row[19] = MRSHL_stdstr_TO_Str(it->chData_text_iso_z);
 
 			ChapterDataTable->Rows->Add(row);
 

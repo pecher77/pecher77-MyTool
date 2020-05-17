@@ -1,12 +1,9 @@
 #pragma once
-//#include "Optimize.h"
 #include "MyForm3.h"
-
 
 
 namespace MyTool 
 {
-
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -1132,8 +1129,8 @@ private: System::Boolean CheckFileInFolder(String^ path, String^ filename)
 {	
 
 
-	fs::path root_path = msclr::interop::marshal_as<std::string>(path);
-	std::string file = msclr::interop::marshal_as<std::string>(filename);
+	fs::path root_path = MRSHL_Str_TO_stdstr(path);
+	std::string file = MRSHL_Str_TO_stdstr(filename);
 
 	if (!fs::is_directory(root_path) || fs::is_regular_file(root_path))
 		return false;
@@ -1164,7 +1161,7 @@ private: System::Boolean CheckFileInFolder(String^ path, String^ filename)
 private: System::Void MakeGamefieldResPath()
 {
 	textBox_GamefieldPath->Text = textbox_ProjectPath->Text + "/base_mm/Gamefield_Resources.xml";
-	std::string file = msclr::interop::marshal_as<std::string>(textBox_GamefieldPath->Text);
+	std::string file = MRSHL_Str_TO_stdstr(textBox_GamefieldPath->Text);
 
 	if (ExistFile(file))
 	{
@@ -1178,7 +1175,7 @@ private: System::Void MakeGamefieldResPath()
 private: System::Void MakeRepairPath()
 {
 	textBox_repairsFolder->Text = textbox_ProjectPath->Text + "/base_mm/repairs";
-	std::string folder = msclr::interop::marshal_as<std::string>(textBox_repairsFolder->Text);
+	std::string folder = MRSHL_Str_TO_stdstr(textBox_repairsFolder->Text);
 	path_repair_path = folder;
 
 	if (ExistDirectory(folder))
@@ -1204,7 +1201,7 @@ private: System::Void FillChapterList()
 	String^ f_name_for_list;
 	for (auto it = CH_files.begin(); it != CH_files.end(); it++)
 	{
-		f_name_for_list = msclr::interop::marshal_as<String^>(*it);
+		f_name_for_list = MRSHL_stdstr_TO_Str(*it);
 		listBox_Chapters->Items->Add(f_name_for_list);
 	}
 
@@ -1214,7 +1211,7 @@ private: System::Void FillChapterList()
 private: System::Void MakeTexturesFolderPath()
 {
 	textBox_textures_folder->Text = textbox_ProjectPath->Text + "/base_mm/textures/Gamefield/static";
-	std::string folder = msclr::interop::marshal_as<std::string>(textBox_textures_folder->Text);
+	std::string folder = MRSHL_Str_TO_stdstr(textBox_textures_folder->Text);
 
 	if (ExistDirectory(folder))
 	{
@@ -1227,7 +1224,7 @@ private: System::Void MakeTexturesFolderPath()
 private: System::Void MakeClustersList()
 {
 	String^ cluster_path = textbox_ProjectPath->Text + "/base_mm";
-	std::string  s = msclr::interop::marshal_as<std::string>(cluster_path);
+	std::string  s = MRSHL_Str_TO_stdstr(cluster_path);
 
 	listBox_clusters->Items->Clear();
 	cluster_folders.clear();
@@ -1243,7 +1240,7 @@ private: System::Void MakeClustersList()
 		{
 			if (fs::is_directory(*itr) && itr->path().stem().string().find("cluster") != -1)
 			{
-				listBox_clusters->Items->Add(msclr::interop::marshal_as<String^>(itr->path().string()));
+				listBox_clusters->Items->Add(MRSHL_stdstr_TO_Str(itr->path().string()));
 				cluster_folders.push_back(itr->path());
 			}
 			itr++;
@@ -1270,7 +1267,7 @@ private: System::Void MakeOLfilesList()
 	listBox_ObLib->Items->Clear();
 	for (auto it = ObjLib_files.begin(); it != ObjLib_files.end(); it++)
 	{
-		String^ ObLib = msclr::interop::marshal_as<String^>(it->string());
+		String^ ObLib = MRSHL_stdstr_TO_Str(it->string());
 		listBox_ObLib->Items->Add(ObLib);	
 	}
 }
@@ -1289,14 +1286,14 @@ private: System::Void textbox_ProjectPath_DoubleClick(System::Object^  sender, S
 	if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) return;
 
 	textbox_ProjectPath->Text = folderBrowserDialog1->SelectedPath;
-	std::string project_folder = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text);
+	std::string project_folder = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text);
 
 	if (ExistDirectory(project_folder) && CheckFileInFolder(textbox_ProjectPath->Text + "/base_mm/cluster1", "ObjectLibrary.xml"))
 	{
 		ConstructPathes();
 		path_game_folder = project_folder;
 		textbox_ProjectPath->BackColor = Color::Honeydew;
-		path_base_mm = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text + "/base_mm");
+		path_base_mm = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text + "/base_mm");
 
 	}
 	else 
@@ -1315,7 +1312,7 @@ private: System::Void textBox_GamefieldPath_DoubleClick(System::Object^  sender,
 
 	textBox_GamefieldPath->Text = openFileDialog1->FileName;
 
-	std::string file = msclr::interop::marshal_as<std::string>(textBox_GamefieldPath->Text);
+	std::string file = MRSHL_Str_TO_stdstr(textBox_GamefieldPath->Text);
 
 
 	if (file.find("Gamefield_Resources.xml") != -1)
@@ -1338,7 +1335,7 @@ private: System::Void textBox_repairsFolder_DoubleClick(System::Object^  sender,
 	if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) return;
 
 	textBox_repairsFolder->Text = folderBrowserDialog1->SelectedPath;
-	std::string folder = msclr::interop::marshal_as<std::string>(textBox_repairsFolder->Text);
+	std::string folder = MRSHL_Str_TO_stdstr(textBox_repairsFolder->Text);
 
 	if (folder.find("repairs")!=-1)
 	{
@@ -1359,7 +1356,7 @@ private: System::Void textBox_textures_folder_DoubleClick(System::Object^  sende
 	if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) return;
 
 	textBox_textures_folder->Text = folderBrowserDialog1->SelectedPath;
-	std::string folder = msclr::interop::marshal_as<std::string>(textBox_textures_folder->Text);
+	std::string folder = MRSHL_Str_TO_stdstr(textBox_textures_folder->Text);
 
 
 	if (folder.find("base_mm/textures") != -1)
@@ -1377,14 +1374,14 @@ private: System::Void textBox_textures_folder_DoubleClick(System::Object^  sende
 /////////ушли с поля
 private: System::Void textbox_ProjectPath_Leave(System::Object^  sender, System::EventArgs^  e) 
 {	
-	std::string path = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text);
+	std::string path = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text);
 	if (ExistDirectory(path) && CheckFileInFolder(textbox_ProjectPath->Text + "/base_mm/cluster1", "ObjectLibrary.xml"))
 	{
-		path_game_folder = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text);
+		path_game_folder = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text);
 		ConstructPathes();
 		textbox_ProjectPath->BackColor = Color::Honeydew;
 
-		path_base_mm = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text + "/base_mm");
+		path_base_mm = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text + "/base_mm");
 
 	}
 	else
@@ -1399,7 +1396,7 @@ private: System::Void textbox_ProjectPath_Leave(System::Object^  sender, System:
 /////////ушли с поля
 private: System::Void textBox_GamefieldPath_Leave(System::Object^  sender, System::EventArgs^  e) 
 {	
-	std::string g_path = msclr::interop::marshal_as<std::string>(textBox_GamefieldPath->Text);
+	std::string g_path = MRSHL_Str_TO_stdstr(textBox_GamefieldPath->Text);
 
 	if (ExistFile(g_path) && g_path.find("Gamefield_Resources.xml")!=-1)
 	{	
@@ -1415,7 +1412,7 @@ private: System::Void textBox_GamefieldPath_Leave(System::Object^  sender, Syste
 /////////ушли с поля
 private: System::Void textBox_repairsFolder_Leave(System::Object^  sender, System::EventArgs^  e) 
 {
-	std::string repair_path = msclr::interop::marshal_as<std::string>(textBox_repairsFolder->Text);
+	std::string repair_path = MRSHL_Str_TO_stdstr(textBox_repairsFolder->Text);
 
 	if (ExistDirectory(repair_path) && repair_path.find("base_mm/repairs") != -1)
 	{
@@ -1436,7 +1433,7 @@ private: System::Void textBox_repairsFolder_Leave(System::Object^  sender, Syste
 /////////ушли с поля
 private: System::Void textBox_textures_folder_Leave(System::Object^  sender, System::EventArgs^  e)
 {
-	std::string textures_folder = msclr::interop::marshal_as<std::string>(textBox_textures_folder->Text);
+	std::string textures_folder = MRSHL_Str_TO_stdstr(textBox_textures_folder->Text);
 
 	if (ExistDirectory(textures_folder) && textures_folder.find("base_mm/textures") != -1)
 	{
@@ -1464,10 +1461,10 @@ private: System::Void button_chooseChapter_Click(System::Object^  sender, System
 	for each(String^ file in openFileDialog1->FileNames)
 	{
 		//listBox_Chapters->Items->Add(file);
-		std::string filename = msclr::interop::marshal_as<std::string>(file);
+		std::string filename = MRSHL_Str_TO_stdstr(file);
 		if (filename.find("CH_") == -1)
 			continue;
-		CH_files.push_back(msclr::interop::marshal_as<std::string>(file));
+		CH_files.push_back(MRSHL_Str_TO_stdstr(file));
 	}
 
 	FillChapterList();
@@ -1479,7 +1476,7 @@ private: System::Void button_minus_chapter_Click(System::Object^  sender, System
 	richTextBox_showdata->Text = "";
 	if (listBox_Chapters->SelectedItem != nullptr)
 	{
-		CH_files.remove(msclr::interop::marshal_as<std::string>(listBox_Chapters->SelectedItem->ToString()));
+		CH_files.remove(MRSHL_Str_TO_stdstr(listBox_Chapters->SelectedItem->ToString()));
 		FillChapterList();
 	}
 	//debug_list();
@@ -1488,10 +1485,10 @@ private: System::Void button_minus_chapter_Click(System::Object^  sender, System
 private: System::Void button_plus_chapter_Click(System::Object^  sender, System::EventArgs^  e)
 {
 	if (openFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) return;
-	std::string filename = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+	std::string filename = MRSHL_Str_TO_stdstr(openFileDialog1->FileName);
 	if (filename.find("CH_") != -1)
 	{
-		CH_files.push_back(msclr::interop::marshal_as<std::string>(openFileDialog1->FileName));
+		CH_files.push_back(MRSHL_Str_TO_stdstr(openFileDialog1->FileName));
 		FillChapterList();
 	}
 	//debug_list();
@@ -1500,10 +1497,10 @@ private: System::Void button_plus_chapter_Click(System::Object^  sender, System:
 private: System::Void listBox_Chapters_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
 {
 	if (listBox_Chapters->SelectedItem == nullptr) return;
-	std::string filename = msclr::interop::marshal_as<std::string>(listBox_Chapters->SelectedItem->ToString());
+	std::string filename = MRSHL_Str_TO_stdstr(listBox_Chapters->SelectedItem->ToString());
 	std::ifstream ifs(filename);
 	std::string filetext((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-	richTextBox_showdata->Text = msclr::interop::marshal_as<String^>(filetext);
+	richTextBox_showdata->Text = MRSHL_stdstr_TO_Str(filetext);
 }
 
 private: System::Void button_clear_list_chapter_Click(System::Object^  sender, System::EventArgs^  e)
@@ -1517,7 +1514,7 @@ private: System::Void button_clear_list_chapter_Click(System::Object^  sender, S
 private: System::Void button_minus_cluster_Click(System::Object^  sender, System::EventArgs^  e)
 {
 
-	fs::path p = msclr::interop::marshal_as<std::string>(listBox_clusters->SelectedItem->ToString());
+	fs::path p = MRSHL_Str_TO_stdstr(listBox_clusters->SelectedItem->ToString());
 	listBox_clusters->Items->Remove(listBox_clusters->SelectedItem);
 	cluster_folders.remove(p);
 
@@ -1533,7 +1530,7 @@ private: System::Void button_plus_cluster_Click(System::Object^  sender, System:
 
 	String^ selected_cluster = folderBrowserDialog1->SelectedPath->ToString();
 
-	fs::path p = msclr::interop::marshal_as<std::string>(selected_cluster);
+	fs::path p = MRSHL_Str_TO_stdstr(selected_cluster);
 
 	cluster_folders.push_back(p);
 	listBox_clusters->Items->Add(selected_cluster);
@@ -1545,7 +1542,7 @@ private: System::Void button_plus_cluster_Click(System::Object^  sender, System:
 //ЛОГ ПУТЬ
 private: System::Void textBox_LOGFILE_Leave(System::Object^  sender, System::EventArgs^  e)
 {
-	path_LOG = msclr::interop::marshal_as<std::string>(textBox_LOGFILE->Text);
+	path_LOG = MRSHL_Str_TO_stdstr(textBox_LOGFILE->Text);
 
 }
 
@@ -1693,20 +1690,20 @@ private: System::Void button_find_prev_Click(System::Object^  sender, System::Ev
 		 //////////////////////Показать xml при клике на GamefieldPath
 private: System::Void textBox_GamefieldPath_Click(System::Object^  sender, System::EventArgs^  e)
 {
-	std::string filename = msclr::interop::marshal_as<std::string>(textBox_GamefieldPath->Text->ToString());
+	std::string filename = MRSHL_Str_TO_stdstr(textBox_GamefieldPath->Text->ToString());
 	std::ifstream ifs(filename);
 	std::string filetext((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-	richTextBox_showdata->Text = msclr::interop::marshal_as<String^>(filetext);
+	richTextBox_showdata->Text = MRSHL_stdstr_TO_Str(filetext);
 }
 
 		 //////////////////////Показать xml при клике на ObLib file
 private: System::Void listBox_ObLib_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
 {
 	if (listBox_ObLib->SelectedItem == nullptr) return;
-	std::string filename = msclr::interop::marshal_as<std::string>(listBox_ObLib->SelectedItem->ToString());
+	std::string filename = MRSHL_Str_TO_stdstr(listBox_ObLib->SelectedItem->ToString());
 	std::ifstream ifs(filename);
 	std::string filetext((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-	richTextBox_showdata->Text = msclr::interop::marshal_as<String^>(filetext);
+	richTextBox_showdata->Text = MRSHL_stdstr_TO_Str(filetext);
 }
 
 #pragma endregion
@@ -1714,14 +1711,14 @@ private: System::Void listBox_ObLib_SelectedIndexChanged(System::Object^  sender
 // ЗАГРУЗКА
 private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e)
 {	
-	this->textbox_ProjectPath->Text = msclr::interop::marshal_as<String^>(path_game_folder);
+	this->textbox_ProjectPath->Text = MRSHL_stdstr_TO_Str(path_game_folder);
 	
-	path_LOG = msclr::interop::marshal_as<std::string>(textBox_LOGFILE->Text);
+	path_LOG = MRSHL_Str_TO_stdstr(textBox_LOGFILE->Text);
 
 	Clear_LogFile();
 	
 	String^ time = Convert::ToString(DateTime::Now);
-	std::string cpp_time = msclr::interop::marshal_as<std::string>(time);
+	std::string cpp_time = MRSHL_Str_TO_stdstr(time);
 	LOG_IN_FILE(cpp_time);
 	this->button_define_unused_textures->BackColor = Color::LimeGreen;
 	//this->BackColor = Color::MintCream;
@@ -1730,17 +1727,17 @@ private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e
 
 private: System::Void MyForm_Shown(System::Object^  sender, System::EventArgs^  e)
 {
-	std::string path = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text);
+	std::string path = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text);
 
 	if (ExistDirectory(path) && CheckFileInFolder(textbox_ProjectPath->Text + "/base_mm/cluster1", "ObjectLibrary.xml"))
 	{
-		path_game_folder = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text);
+		path_game_folder = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text);
 		ConstructPathes();
 		GetChapterFiles();
 
 		textbox_ProjectPath->BackColor = Color::Honeydew;
 
-		path_base_mm = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text + "/base_mm");
+		path_base_mm = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text + "/base_mm");
 
 		
 	}
@@ -1762,7 +1759,7 @@ private: System::Void MyForm_Shown(System::Object^  sender, System::EventArgs^  
 		MessageBox::Show("Wrong project folder, set project path");
 
 	}
-	path_LOG = msclr::interop::marshal_as<std::string>(textBox_LOGFILE->Text);
+	path_LOG = MRSHL_Str_TO_stdstr(textBox_LOGFILE->Text);
 }
 
 private: System::Void MyForm_FormClosed(System::Object^  sender, System::Windows::Forms::FormClosedEventArgs^  e)
@@ -1806,7 +1803,7 @@ private: System::Void button_define_unused_textures_Click(System::Object^  sende
 	}
 
 
-	path_base_mm = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text + "/base_mm");
+	path_base_mm = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text + "/base_mm");
 
 	//this->Hide();
 	if (textures.empty())
@@ -1917,7 +1914,7 @@ private: System::Void FillChapterListT2()
 	String^ f_name_for_list;
 	for (auto it = CH_files.begin(); it != CH_files.end(); it++)
 	{
-		f_name_for_list = msclr::interop::marshal_as<String^>(*it);
+		f_name_for_list = MRSHL_stdstr_TO_Str(*it);
 		listBox_CH->Items->Add(f_name_for_list);
 	}
 
@@ -1930,7 +1927,7 @@ private: System::Void Fill_ids_to_change()
 	ch_attrib_ids.clear();
 	String^ text = textBox_ids->Text;
 
-	std::string s_text = msclr::interop::marshal_as<std::string>(text);
+	std::string s_text = MRSHL_Str_TO_stdstr(text);
 
 	int length = s_text.length();
 
@@ -1967,10 +1964,10 @@ private: System::Void Fill_ids_to_change()
 private: System::Void listBox_CH_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)
 {
 	if (listBox_CH->SelectedItem == nullptr) return;
-	std::string filename = msclr::interop::marshal_as<std::string>(listBox_CH->SelectedItem->ToString());
+	std::string filename = MRSHL_Str_TO_stdstr(listBox_CH->SelectedItem->ToString());
 	std::ifstream ifs(filename);
 	std::string filetext((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-	richTextBox_showdata->Text = msclr::interop::marshal_as<String^>(filetext);
+	richTextBox_showdata->Text = MRSHL_stdstr_TO_Str(filetext);
 }
 
 		////////////////////////////////изменение таба
@@ -1978,7 +1975,7 @@ private: System::Void Tabs_SelectedIndexChanged(System::Object^  sender, System:
 {	
 	richTextBox_showdata->Text = "choose file";
 
-	std::string path = msclr::interop::marshal_as<std::string>(textbox_ProjectPath->Text);
+	std::string path = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text);
 
 	switch (Tabs->SelectedIndex)
 	{
@@ -2084,7 +2081,7 @@ private: System::Void textBox_value_Leave_1(System::Object^  sender, System::Eve
 	if (Int32::TryParse(textBox_value->Text, distance))
 	{
 		String^ value = Convert::ToString(distance);
-		ch_attrib_value = msclr::interop::marshal_as<std::string>(value);
+		ch_attrib_value = MRSHL_Str_TO_stdstr(value);
 		// it's a valid integer => you could use the distance variable here
 	}
 	else
@@ -2201,7 +2198,7 @@ private: System::Void button_change_attribute_Click(System::Object^  sender, Sys
 
 	if (result.size() == 1)
 	{
-		String^ res = msclr::interop::marshal_as<String^>(result[0]);
+		String^ res = MRSHL_stdstr_TO_Str(result[0]);
 		MessageBox::Show(res);
 		return;
 	}
@@ -2226,7 +2223,7 @@ private: System::Void button_change_attribute_Click(System::Object^  sender, Sys
 		return;
 	}
 
-	String^ res = msclr::interop::marshal_as<String^>(text);
+	String^ res = MRSHL_stdstr_TO_Str(text);
 	MessageBox::Show(res);
 
 	
@@ -2241,10 +2238,10 @@ private: System::Void button_tab2_plus_ch_Click(System::Object^  sender, System:
 {
 	if (openFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::Cancel) return;
 
-	std::string filename = msclr::interop::marshal_as<std::string>(openFileDialog1->FileName);
+	std::string filename = MRSHL_Str_TO_stdstr(openFileDialog1->FileName);
 	if (filename.find("CH_") != -1)
 	{
-		CH_files.push_back(msclr::interop::marshal_as<std::string>(openFileDialog1->FileName));
+		CH_files.push_back(MRSHL_Str_TO_stdstr(openFileDialog1->FileName));
 		FillChapterListT2();
 		FillRepairsAndSteps();
 		FillComboRepairs();
@@ -2257,7 +2254,7 @@ private: System::Void button_tab2_minus_ch_Click(System::Object^  sender, System
 	richTextBox_showdata->Text = "";
 	if (listBox_Chapters->SelectedItem != nullptr)
 	{
-		CH_files.remove(msclr::interop::marshal_as<std::string>(listBox_Chapters->SelectedItem->ToString()));
+		CH_files.remove(MRSHL_Str_TO_stdstr(listBox_Chapters->SelectedItem->ToString()));
 		FillChapterListT2();
 		FillRepairsAndSteps();
 		FillComboRepairs();
@@ -2287,10 +2284,10 @@ private: System::Void button_tab2_choose_ch_Click(System::Object^  sender, Syste
 	for each(String^ file in openFileDialog1->FileNames)
 	{
 		//listBox_Chapters->Items->Add(file);
-		std::string filename = msclr::interop::marshal_as<std::string>(file);
+		std::string filename = MRSHL_Str_TO_stdstr(file);
 		if (filename.find("CH_") == -1)
 			continue;
-		CH_files.push_back(msclr::interop::marshal_as<std::string>(file));
+		CH_files.push_back(MRSHL_Str_TO_stdstr(file));
 	}
 
 	FillChapterListT2();
@@ -2307,7 +2304,7 @@ private: System::Void FillComboRepairs()
 	if (!repairs.empty())
 	for each(const auto& repair in repairs)
 	{	
-		String^ temp = msclr::interop::marshal_as<String^>(repair);
+		String^ temp = MRSHL_stdstr_TO_Str(repair);
 		comboBox_repair->Items->Add(temp);
 	}
 }
@@ -2318,7 +2315,7 @@ private: System::Void FillComboSteps()
 	if (!steps.empty())
 	for each(const auto& step in steps)
 	{
-		String^ temp = msclr::interop::marshal_as<String^>(step);
+		String^ temp = MRSHL_stdstr_TO_Str(step);
 		comboBox_step->Items->Add(temp);
 	}
 }
@@ -2337,7 +2334,7 @@ private: System::Void comboBox_repair_SelectedIndexChanged(System::Object^  send
 	}
 	else
 	{	
-		chosen_repair = msclr::interop::marshal_as<std::string>(text);
+		chosen_repair = MRSHL_Str_TO_stdstr(text);
 		int pos = chosen_repair.find(" - ");
 		chosen_repair = chosen_repair.substr(pos + 3);
 		text = text + " - ";
@@ -2351,7 +2348,7 @@ private: System::Void comboBox_step_SelectedIndexChanged(System::Object^  sender
 	String^ text_step = this->comboBox_step->Text;
 	String^ text_repair = this->comboBox_repair->Text;
 
-	std::string s_text_repair = msclr::interop::marshal_as<std::string>(text_repair);
+	std::string s_text_repair = MRSHL_Str_TO_stdstr(text_repair);
 
 	int repair_length = s_text_repair.length();
 
@@ -2361,7 +2358,7 @@ private: System::Void comboBox_step_SelectedIndexChanged(System::Object^  sender
 	}
 	else
 	{
-		chosen_step = msclr::interop::marshal_as<std::string>(text_step);
+		chosen_step = MRSHL_Str_TO_stdstr(text_step);
 		chosen_step = chosen_step.substr(repair_length+3);
 	}
 }
@@ -2376,13 +2373,13 @@ private: System::Void CutStepsCombobox(String^ repair)
 	}
 	comboBox_step->Items->Clear();
 	comboBox_step->Items->Add("");
-	std::string s_repair = msclr::interop::marshal_as<std::string>(repair);
+	std::string s_repair = MRSHL_Str_TO_stdstr(repair);
 
 	for (auto& step : steps)
 	{
 		if (step.find(s_repair) != -1)
 		{
-			String^ temp = msclr::interop::marshal_as<String^>(step);
+			String^ temp = MRSHL_stdstr_TO_Str(step);
 			comboBox_step->Items->Add(temp);
 		}
 	}

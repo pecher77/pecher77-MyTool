@@ -1,34 +1,24 @@
-
+#include "pch.h"
 #include "Optimize.h"
-#include "Macro.h"
+#include "tinyxml2.h"
 #include "MyForm3.h"
+#include "Core.h"
 
-std::set<TextureData>		textures;
+namespace MyTool {
 
-std::multiset<GameFieldRes*>	GameField_objects;
-std::multiset<ObjLibLayer*>		ObjLib_layers;
-std::multiset<ObjLibItem*>		ObjLib_items;
-std::multiset<ChapterData*>		CH_objects;
-std::set<ParticleEffect*>		particle_effects;
+//namespace fs = boost::filesystem;
 
-std::list<std::string>			CH_files;
-std::list<fs::path>				cluster_folders;
-std::vector<fs::path>			ObjLib_files;
+	std::set<TexturePtr>				textures;
+	std::multiset<GameFieldResPtr>		GameField_objects;
+	std::multiset<ObjLibItemPtr>		ObjLib_items;
+	std::multiset<ObjLibLayerPtr>		ObjLib_layers;
+	std::multiset<ChapterDataPtr>		CH_objects;
+	std::set<ParticleEffectPtr>			particle_effects;
 
-std::vector<fs::path>			problem_textures_path;
+	std::vector<fs::path>				problem_textures_path;
+	std::multiset<CH_ParticleEffect>	meta_particle_repair_effects;
 
-std::vector<std::string>		repairs;
-std::vector<std::string>		steps;
-
-std::string chosen_repair = "not chosen";
-std::string chosen_step = "not chosen";
-
-std::multiset<CH_ParticleEffect>meta_particle_repair_effects;
-
-std::multimap<fs::path, fs::path> texture_particle_effect; //текстура, эффект
-
-bool cancelExecution = false;
-static int count = 0;
+	std::multimap<fs::path, fs::path>	texture_particle_effect; //текстура, эффект
 
 template<class T>
 void PrintToLogFile(T begin, T end, std::string log_path)
@@ -42,46 +32,9 @@ void PrintToLogFile(T begin, T end, std::string log_path)
 	ofs_log.close();
 }
 
-//очистить лог
-void Clear_LogFile()
-{
 
-	//fs::path log_path = path_LOG;
-	//fs::remove(log_path);
-	ofs.open(path_LOG, std::ios::out | std::fstream::trunc);
-	ofs.close();
-	LOG_IN_FILE("start");
-
-}
-
-void GetAttributes(ChapterData& ch);
-
-//получить все текстуры в объекты TextureData, наполнить ими std::multiset<TextureData>textures;
-void GetTextureFiles()
-{
-	//из папки
-	fs::path path = path_texture_folder;
-	fs::recursive_directory_iterator itr(path), end_itr;
-
-	while (itr != end_itr)
-	{
-		if (cancelExecution)
-			break;
-		if (fs::is_regular_file(*itr))
-		{
-			TextureData* d = new TextureData;
-
-			d->TD_texture_name = itr->path();
-			d->TD_size = fs::file_size(itr->path());
-			d->TD_s_texture_name = d->TD_texture_name.string();
-			textures.emplace(*d);
-		}
-		itr++;
-	}
-
-	//std::sort(textures.begin(), textures.end());
-}
-
+//пересчет для индикатора загрузки
+#pragma region пересчет
 int Count_GameFieldRes()
 {
 	std::string static_text = "/static/";
@@ -250,11 +203,38 @@ int Count_ParticleEffect()
 
 	return count;
 }
+#pragma endregion
+
+#pragma region сбор_ресурсов
+//получить все текстуры в объекты TextureData, наполнить ими std::multiset<TextureData>textures;
+void GetTextureFiles()
+{
+	//из папки
+	fs::path path = path_texture_folder;
+	fs::recursive_directory_iterator itr(path), end_itr;
+
+	while (itr != end_itr)
+	{
+		if (cancelExecution)
+			break;
+		if (fs::is_regular_file(*itr))
+		{
+			TexturePtr texture_ptr(new TextureData);
+			texture_ptr->TD_texture_name = itr->path();
+			texture_ptr->TD_size = fs::file_size(itr->path());
+			texture_ptr->TD_s_texture_name = texture_ptr->TD_texture_name.string();
+			textures.emplace(texture_ptr);
+		}
+		itr++;
+	}
+
+	//std::sort(textures.begin(), textures.end());
+}
 
 //преобразовать Gamefield_Resources.xml в объекты GameFieldRes (только текстуры из static папки . пример пути: - "basePath="textures/Gamefield/static/FirstGarden/Tutorial">"), наполнить set<GameFieldRes>GameField_objects;
 void Get_GameFieldRes_Info()
 {	
-	count = 0;
+	res_count = 0;
 
 	std::string static_text = "/static/";
 
@@ -290,33 +270,31 @@ void Get_GameFieldRes_Info()
 				if (cancelExecution)
 					return;
 				all_path = root_path;
-				GameFieldRes* gr = new GameFieldRes();
+				GameFieldResPtr gr_ptr(new GameFieldRes);
 
 				all_path /= sprite->Attribute("path");
 				all_path.replace_extension(".png");
 
-				gr->gameFieldRes_full_path = all_path;
+				gr_ptr->gameFieldRes_full_path = all_path;
 				//gr->GR_full_path.replace_extension(".png");
-				gr->gameFieldRes_s_full_path = gr->gameFieldRes_full_path.string();
-				gr->gameFieldRes_id = sprite->Attribute("id");
-				gr->gameFieldRes_path_attr = sprite->Attribute("path");
-				gr->gameFieldRes_texture_group_atlas = atlas;
-				gr->gameFieldRes_path = path_t;
+				gr_ptr->gameFieldRes_s_full_path = gr_ptr->gameFieldRes_full_path.string();
+				gr_ptr->gameFieldRes_id = sprite->Attribute("id");
+				gr_ptr->gameFieldRes_path_attr = sprite->Attribute("path");
+				gr_ptr->gameFieldRes_texture_group_atlas = atlas;
+				gr_ptr->gameFieldRes_path = path_t;
 
+				gr_ptr->gameFieldRes_TextureData = FindTexture(all_path); //TODO сколько ссылок на данный момент??не может не найти иначе халты вылазят 
+				int ref_count = gr_ptr->gameFieldRes_TextureData.use_count();
 
+				gr_ptr->gameFieldRes_TextureData->TD_GRs.emplace(gr_ptr); //передал в текстуру ссылку на gr
+				gr_ptr->gameFieldRes_TextureData->TD_exist_in_GR = "+";
 
-				gr->gameFieldRes_TextureData = FindTexture(all_path); //не может не найти иначе халты вылазят 
-
-
-				gr->gameFieldRes_TextureData->TD_GRs.emplace(gr); //передал в текстуру ссылку на gr
-				gr->gameFieldRes_TextureData->TD_exist_in_GR = "+";
-
-				count++;
+				res_count++;
 				if (cancelExecution)
 					return;
-				MyTool::MyForm3::UpdateProgress(count, "Collect from GameFieldResources : ", gr->gameFieldRes_s_full_path);
+				MyTool::MyForm3::UpdateProgress(res_count, "Collect from GameFieldResources : ", gr_ptr->gameFieldRes_s_full_path);
 
-				GameField_objects.emplace(gr); 
+				GameField_objects.emplace(gr_ptr);
 				
 			}
 		}
@@ -325,20 +303,16 @@ void Get_GameFieldRes_Info()
 
 }
 
-
 void Get_ObjectLibrary_Info()
 {	
 	if (cancelExecution)
 		return;
-	//int count = 0;
+	
 	std::string objItem_instanceClass_temp;
 	std::string objItem_defaultZOrder_temp;
 	std::string objItem_isIndoor_temp;
-	std::vector<ObjLibLayer*> objItem_layers_temp; //лейеры из которых состоит item
-
-
-	//GameFieldRes* objLayer_GameFieldRes_temp; //
-	std::vector<ObjLibItem*> objLayer_items_temp; //items где присутствует данный лейер
+	std::vector<ObjLibLayerPtr> objItem_layers_temp; //лейеры из которых состоит item
+	std::vector<ObjLibItemPtr> objLayer_items_temp; //items где присутствует данный лейер
 
 	for (auto& obj_file : ObjLib_files)
 	{
@@ -347,7 +321,6 @@ void Get_ObjectLibrary_Info()
 
 		tinyxml2::XMLDocument ObjectLibrary_doc;
 		ObjectLibrary_doc.LoadFile(obj_file.string().c_str());
-
 		tinyxml2::XMLElement* ObjectLibrarySchemeElement = ObjectLibrary_doc.FirstChildElement();
 
 
@@ -370,76 +343,88 @@ void Get_ObjectLibrary_Info()
 			{	
 				if (cancelExecution)
 					return;
-				ObjLibItem* ObjItem = new ObjLibItem;
-				ObjItem->objItem_item_id = item_node->Attribute("id");
+
+				ObjLibItemPtr ObjItem_ptr(new ObjLibItem);
+
+				ObjItem_ptr->objItem_item_id = item_node->Attribute("id");
 
 				if (item_node->Attribute("noRedesignDeformation") == NULL)
-					ObjItem->objItem_noRedesignDeformation = "false";
+					ObjItem_ptr->objItem_noRedesignDeformation = "false";
 				else
-					ObjItem->objItem_noRedesignDeformation = item_node->Attribute("noRedesignDeformation");
+					ObjItem_ptr->objItem_noRedesignDeformation = item_node->Attribute("noRedesignDeformation");
 				
-				ObjItem->objItem_instanceClass = objItem_instanceClass_temp;
-				ObjItem->objItem_isIndoor = objItem_isIndoor_temp;
-				ObjItem->objItem_defaultZOrder = objItem_defaultZOrder_temp;
-				ObjItem->objItem_cluster = obj_file.parent_path().stem().string();
+				ObjItem_ptr->objItem_instanceClass = objItem_instanceClass_temp;
+				ObjItem_ptr->objItem_isIndoor = objItem_isIndoor_temp;
+				ObjItem_ptr->objItem_defaultZOrder = objItem_defaultZOrder_temp;
+				ObjItem_ptr->objItem_cluster = obj_file.parent_path().stem().string();
 
 				for (tinyxml2::XMLElement* layer_node = item_node->FirstChildElement(); layer_node != NULL; layer_node = layer_node->NextSiblingElement())
 				{	
 					if (cancelExecution)
 						return;
 					if (to_string(layer_node->Name()) == "layer")
-					{
-						ObjLibLayer* Objlayer = new ObjLibLayer;
+					{	
+						ObjLibLayerPtr Objlayer_ptr(new ObjLibLayer);
+						
 						if (layer_node->Attribute("texture") != NULL)
 						{
-							Objlayer->objLayer_texture = layer_node->Attribute("texture");
+							Objlayer_ptr->objLayer_texture = layer_node->Attribute("texture");
 						}
-						Objlayer->objLayer_type = layer_node->Attribute("type");
+
+						Objlayer_ptr->objLayer_type = layer_node->Attribute("type");
 
 						if (layer_node->Attribute("zOrder") != NULL)
-							Objlayer->objLayer_zOrder = layer_node->Attribute("zOrder");
+							Objlayer_ptr->objLayer_zOrder = layer_node->Attribute("zOrder");
 						
 						//указатель в лейере на GameFieldRes ищем если тип текстура, а не эффект или свет - эффекта или света нет в GR
-						if (Objlayer->objLayer_type == "texture")
+						if (Objlayer_ptr->objLayer_type == "texture")
 						{	
 							if (cancelExecution)
 								return;
-							auto& it_GR = std::find_if(GameField_objects.begin(), GameField_objects.end(), 
-								[&](GameFieldRes* gr)
+							auto it_GR = std::find_if(GameField_objects.begin(), GameField_objects.end(), 
+								[&](const GameFieldResPtr gr)
 							{
-								return  Objlayer->objLayer_texture == gr->gameFieldRes_id;
+								return  Objlayer_ptr->objLayer_texture == gr->gameFieldRes_id;
 							});
 
 							if (it_GR == GameField_objects.end())
 							{
-								Objlayer->objLayer_GameFieldRes = nullptr; //type="effect" или type="light" только спайн анимация??
+								Objlayer_ptr->objLayer_GameFieldRes = nullptr; //type="effect" или type="light" только спайн анимация??
 							}
 							else
 							{
-
-								(*it_GR)->gameFieldRes_ObjLibLayers.push_back(&(*Objlayer));
+								(*it_GR)->gameFieldRes_ObjLibLayers.push_back(Objlayer_ptr);
 								(*it_GR)->gameFieldRes_TextureData->TD_exist_in_OL = "+";
-								(*it_GR)->gameFieldRes_unique_items.emplace(&(*ObjItem));
 
-								Objlayer->objLayer_GameFieldRes = (*it_GR);
+								//проверка, что в GR уже нет такого айтема (должны быть уникалиными), добавляем если еще нет
+									auto& it = std::find_if((*it_GR)->gameFieldRes_unique_items.begin(), (*it_GR)->gameFieldRes_unique_items.end(),
+										[&](const ObjLibItemPtr& item_l) {
+										return ObjItem_ptr->objItem_item_id == item_l->objItem_item_id;
+									});
+									if (it == (*it_GR)->gameFieldRes_unique_items.end())
+									{
+										(*it_GR)->gameFieldRes_unique_items.emplace(ObjItem_ptr);
+									}
+
+								Objlayer_ptr->objLayer_GameFieldRes = *it_GR;
 							}
 						}
 
 						//ссылка в леере на содержащий лейер айтем 
-						Objlayer->objLayer_item = ObjItem;
+						Objlayer_ptr->objLayer_item = ObjItem_ptr;
 
-						//вектор лееров, составляющих item (ссылка из айтема на леер, вектор так как может быть несколько слоев)
-						ObjItem->objItem_layers.push_back(Objlayer);
-						ObjLib_layers.emplace(Objlayer);
+						//вектор лееров, составляющих item (ссылка из айтема на леер, вектор - так как может быть несколько слоев)
+						ObjItem_ptr->objItem_layers.push_back(Objlayer_ptr);
+						ObjLib_layers.emplace(Objlayer_ptr);
 					}
 					
 					
 				}
-				count++;
+				res_count++;
 				if (cancelExecution)
 					return;
-				MyTool::MyForm3::UpdateProgress(count, "Collect items from ObjectLibrary : ", ObjItem->objItem_item_id);
-				ObjLib_items.emplace(ObjItem);
+				MyTool::MyForm3::UpdateProgress(res_count, "Collect items from ObjectLibrary : ", ObjItem_ptr->objItem_item_id);
+				ObjLib_items.emplace(ObjItem_ptr);
 			}
 		}
 
@@ -505,48 +490,46 @@ void Get_ChapterData_Info()
 						{
 							LOG(object->Attribute("id"));
 							//собираем чаптеры
-							ChapterData* ch = new ChapterData;
-							ch->chData_storyInfo_chapter_id = chData_storyInfo_chapter_id_temp;
-							ch->chData_storyInfo_repair = chData_storyInfo_repair_temp;
-							ch->chData_storyInfo_step = chData_storyInfo_step_temp;
+							//ChapterData* ch = new ChapterData;
+							ChapterDataPtr ch_ptr(new ChapterData);
+							ch_ptr->chData_storyInfo_chapter_id = chData_storyInfo_chapter_id_temp;
+							ch_ptr->chData_storyInfo_repair = chData_storyInfo_repair_temp;
+							ch_ptr->chData_storyInfo_step = chData_storyInfo_step_temp;
 
-							ch->chData_id = object->Attribute("id");
-							ch->chData_text = object->GetText();
-							GetAttributes(*ch);
+							ch_ptr->chData_id = object->Attribute("id");
+							ch_ptr->chData_text = object->GetText();
+							GetAttributes(*ch_ptr);
 							
-							count++;
+							res_count++;
 							//найти item для датаайди (он 1)
 							auto& ob_it = std::find_if(ObjLib_items.begin(), ObjLib_items.end(),
-								[&](ObjLibItem* obj)
+								[&](const ObjLibItemPtr& obj)
 							{
-								return obj->objItem_item_id == ch->chData_text_dataid;
+								return obj->objItem_item_id == ch_ptr->chData_text_dataid;
 							});
 
-
 							if (ob_it == ObjLib_items.end())
-								ch->chData_ObjLibItem = NULL; //датаайди, которой нет в objectLibrary?? не может быть
+								ch_ptr->chData_ObjLibItem = NULL; //датаайди, которой нет в objectLibrary?? не может быть
 							else
 							{
 								/*const ObjLibItem* ch1 = *ob_it;
 								ObjLibItem& ch2 = const_cast<ObjLibItem&>(*ch1);*/
 								//ObjLibItem *ch3 = &ch3;
-								ch->chData_ObjLibItem = *ob_it;
+								ch_ptr->chData_ObjLibItem = *ob_it;
 								//ObjLibItem
-								ch->chData_ObjLibItem->objItem_ChapterDatas.push_back(ch);
+								ch_ptr->chData_ObjLibItem->objItem_ChapterDatas.push_back(ch_ptr);
 							}
 
-							
-							
-							for (auto& layer : ch->chData_ObjLibItem->objItem_layers)
+						
+							for (auto& layer : ch_ptr->chData_ObjLibItem->objItem_layers)
 							{	
 								if (layer->objLayer_type == "texture")
 									layer->objLayer_GameFieldRes->gameFieldRes_TextureData->TD_exist_in_CH = "+";
-
 							}
 							if (cancelExecution)
 								return;
-							MyTool::MyForm3::UpdateProgress(count, "Collect object from Chapter files : ", ch->chData_storyInfo_chapter_id + " - " + ch->chData_storyInfo_repair + " - " + ch->chData_storyInfo_step + " - " + ch->chData_text_dataid);
-							CH_objects.emplace(ch);
+							MyTool::MyForm3::UpdateProgress(res_count, "Collect object from Chapter files : ", ch_ptr->chData_storyInfo_chapter_id + " - " + ch_ptr->chData_storyInfo_repair + " - " + ch_ptr->chData_storyInfo_step + " - " + ch_ptr->chData_text_dataid);
+							CH_objects.emplace(ch_ptr);
 						}
 					}
 				}
@@ -588,7 +571,8 @@ void Get_ParticleEffect_Info()
 				//std::string node_name = to_string(ParticleSystem->Name());
 				if (ParticleSystem != NULL && to_string(ParticleSystem->Name()) == "ParticleSystem")
 				{
-					ParticleEffect* p = new ParticleEffect();
+					
+					ParticleEffectPtr peff_ptr(new ParticleEffect);
 
 					int pos = itr->path().string().find("cluster");
 					if (pos != -1)
@@ -600,19 +584,19 @@ void Get_ParticleEffect_Info()
 							name += path[pos];
 							pos++;
 						}
-						p->partEff_cluster = name;
+						peff_ptr->partEff_cluster = name;
 					}
-					else p->partEff_cluster = "base_mm/effect";
-					p->partEff_name_p = itr->path();
-					p->partEff_name_s = itr->path().string();
+					else peff_ptr->partEff_cluster = "base_mm/effect";
+					peff_ptr->partEff_name_p = itr->path();
+					peff_ptr->partEff_name_s = itr->path().string();
 
 					
 					for (; ParticleSystem != NULL; ParticleSystem = ParticleSystem->NextSiblingElement())
 					{	
 						if (cancelExecution)
 							return;
-						ParticleEffectLayer* effect_layer = new ParticleEffectLayer;
-
+						
+						ParticleEffectLayerPtr peff_layer_ptr(new ParticleEffectLayer);
 						p_type = path_base_mm;
 						if (ParticleSystem->Attribute("texture") != NULL)
 						{
@@ -620,25 +604,25 @@ void Get_ParticleEffect_Info()
 							p_type.replace_extension(".png");
 
 							if (fs::exists(p_type))
-								effect_layer->effectLayer_file_exist = "+";
+								peff_layer_ptr->effectLayer_file_exist = "+";
 
 							
-							effect_layer->effectLayer_effectTexture_path_p = p_type;
-							effect_layer->effectLayer_effectTexture_path_s = p_type.string();
+							peff_layer_ptr->effectLayer_effectTexture_path_p = p_type;
+							peff_layer_ptr->effectLayer_effectTexture_path_s = p_type.string();
 							
 					
-							if (effect_layer->effectLayer_file_exist == "+")
+							if (peff_layer_ptr->effectLayer_file_exist == "+")
 							{
-								TextureData* td = FindTexture(p_type);
+								TexturePtr td = FindTexture(p_type);
 								if (td != nullptr)
 								{
-									effect_layer->effectLayer_TextureData = td;
+									peff_layer_ptr->effectLayer_TextureData = td;
 									//если такая текстура есть в наборе текстур, то пушу в сет указатель на эффект
-									effect_layer->effectLayer_TextureData->TD_effects.emplace(&(*p));
+									peff_layer_ptr->effectLayer_TextureData->TD_effects.emplace(peff_ptr);
 								}
 								
 							}
-							p->partEff_ParticleEffectLayers.push_back(effect_layer);
+							peff_ptr->partEff_ParticleEffectLayers.push_back(peff_layer_ptr);
 						}
 					}
 
@@ -648,41 +632,37 @@ void Get_ParticleEffect_Info()
 						return;
 					//найти леер, передать в него ссылку на эффект
 					std::for_each(ObjLib_layers.begin(), ObjLib_layers.end(),
-						[&]( ObjLibLayer* layer)
+						[&](const ObjLibLayerPtr& layer)
 					{	
 						
 						if (eff_name == layer->objLayer_texture)
 						{
 							//леер в партикл эффект
-							p->partEff_ObjLibLayers.push_back(layer);
+							peff_ptr->partEff_ObjLibLayers.push_back(layer);
 							//ссылка в леере на партокловый эффект
-							layer->objItem_ParticleEffect = p;
+							layer->objItem_ParticleEffect = peff_ptr;
 							
 							if (!layer->objLayer_item->objItem_ChapterDatas.empty())
 							{
-								p->partEff_exist_in_CH = "+";
+								peff_ptr->partEff_exist_in_CH = "+";
 								if (layer->objLayer_type != "light" && layer->objLayer_type != "effect")
 									layer->objLayer_GameFieldRes->gameFieldRes_TextureData->TD_EF_exist_in_CH = "+";
 							}
 						}
+
 					});
 
-					
-					
-
-					count++;
+				
+					res_count++;
 					count_local++;
 					if (cancelExecution)
 						return;
-					MyTool::MyForm3::UpdateProgress(count, "Collect ParticleEffects from cluster folders: ", p->partEff_name_s);
-					particle_effects.emplace(p);
+					MyTool::MyForm3::UpdateProgress(res_count, "Collect ParticleEffects from cluster folders: ", peff_ptr->partEff_name_s);
+					particle_effects.emplace(peff_ptr);
 					itr++;
 					continue;
 				}
-
-
 			}
-
 			itr++;
 		}
 
@@ -709,18 +689,19 @@ void Get_ParticleEffect_Info()
 			{	
 				if (cancelExecution)
 					return;
-				ParticleEffect* p = new ParticleEffect();
-				p->partEff_name_p = itr->path();
-				p->partEff_name_s = itr->path().string();
-				p->partEff_cluster = "base_mm/effects";
+				ParticleEffectPtr peff_ptr(new ParticleEffect);
+				
+				peff_ptr->partEff_name_p = itr->path();
+				peff_ptr->partEff_name_s = itr->path().string();
+				peff_ptr->partEff_cluster = "base_mm/effects";
 
 				//лееры в объекты
 				for (; ParticleSystem != NULL; ParticleSystem = ParticleSystem->NextSiblingElement())
 				{	
 					if (cancelExecution)
 						return;
-					ParticleEffectLayer* effect_layer = new ParticleEffectLayer;
-
+					ParticleEffectLayerPtr peff_layer_ptr(new ParticleEffectLayer);
+					
 					p_type = path_base_mm;
 					if (ParticleSystem->Attribute("texture") != NULL)
 					{
@@ -728,27 +709,27 @@ void Get_ParticleEffect_Info()
 						p_type /= ParticleSystem->Attribute("texture");
 						p_type.replace_extension(".png");
 
-						effect_layer->effectLayer_effectTexture_path_p = p_type;
-						effect_layer->effectLayer_effectTexture_path_s = p_type.string();
+						peff_layer_ptr->effectLayer_effectTexture_path_p = p_type;
+						peff_layer_ptr->effectLayer_effectTexture_path_s = p_type.string();
 
 						if (fs::exists(p_type))
-							effect_layer->effectLayer_file_exist = "+";
+							peff_layer_ptr->effectLayer_file_exist = "+";
 						
 						/*TextureData *temp = new TextureData;
 						temp->TD_texture_name = effect_layer->effectLayer_effectTexture_path_p;*/
 
 
-						if (effect_layer->effectLayer_file_exist == "+" && p_type.string().find("Gamefield") !=-1 && p_type.string().find("static") != -1)
+						if (peff_layer_ptr->effectLayer_file_exist == "+" && p_type.string().find("Gamefield") !=-1 && p_type.string().find("static") != -1)
 						{
-							TextureData* td = FindTexture(p_type);
+							TexturePtr td = FindTexture(p_type);
 							if (td != nullptr)
 							{
-								effect_layer->effectLayer_TextureData = td;
+								peff_layer_ptr->effectLayer_TextureData = td;
 								//если такая текстура есть в наборе текстур, то пушу в сет указатель на эффект
-								effect_layer->effectLayer_TextureData->TD_effects.emplace(&(*p));
+								peff_layer_ptr->effectLayer_TextureData->TD_effects.emplace(peff_ptr);
 							}
 						}
-						p->partEff_ParticleEffectLayers.push_back(effect_layer);
+						peff_ptr->partEff_ParticleEffectLayers.push_back(peff_layer_ptr);
 						//texture_particle_effect.emplace(std::make_pair(p_type, itr->path())); //вставляем текстуру, эффект
 					}
 				}
@@ -758,22 +739,19 @@ void Get_ParticleEffect_Info()
 					return;
 				//найти леер, передать в него ссылку на эффект
 				std::for_each(ObjLib_layers.begin(), ObjLib_layers.end(),
-					[&](ObjLibLayer* layer)
+					[&](const ObjLibLayerPtr& layer)
 				{
 					if (layer->objLayer_type == "light" || layer->objLayer_type == "effect")
 						if (eff_name == layer->objLayer_texture)
 						{
-							/*ObjLibLayer* layer2 = layer;
-							ObjLibLayer& layer3 = const_cast<ObjLibLayer&>(*layer2);
-							ObjLibLayer* layer4 = &layer3;*/
 							//леер в партикл эффект
-							p->partEff_ObjLibLayers.push_back(layer);
+							peff_ptr->partEff_ObjLibLayers.push_back(layer);
 							//ссылка в леере на партокловый эффект
-							layer->objItem_ParticleEffect = &(*p);
+							layer->objItem_ParticleEffect = peff_ptr;
 
 							if (!layer->objLayer_item->objItem_ChapterDatas.empty())
 							{
-								p->partEff_exist_in_CH = "+";
+								peff_ptr->partEff_exist_in_CH = "+";
 								if (layer->objLayer_type != "light" && layer->objLayer_type != "effect")
 									layer->objLayer_GameFieldRes->gameFieldRes_TextureData->TD_EF_exist_in_CH = "+";
 							}
@@ -781,16 +759,14 @@ void Get_ParticleEffect_Info()
 				});
 
 				count_local++;
-				count++;
+				res_count++;
 				if (cancelExecution)
 					return;
-				MyTool::MyForm3::UpdateProgress(count, "Collect ParticleEffects from base_mm/effects: ", p->partEff_name_s);
-				particle_effects.emplace(p);
+				MyTool::MyForm3::UpdateProgress(res_count, "Collect ParticleEffects from base_mm/effects: ", peff_ptr->partEff_name_s);
+				particle_effects.emplace(peff_ptr);
 				itr++;
 				continue;
-
 			}
-
 		}
 		itr++;
 	}
@@ -807,10 +783,10 @@ void DeleteOrNot()
 	for (auto& texture : textures)
 	{	
 		_delete = false;
-		if (!texture.TD_GRs.empty()) //есть в GR
+		if (!texture->TD_GRs.empty()) //есть в GR
 		{	
 			int chapters = 0;
-			for (auto& gr : texture.TD_GRs)
+			for (auto& gr : texture->TD_GRs)
 			{
 				if (!gr->gameFieldRes_unique_items.empty()) //есть items
 				{
@@ -822,12 +798,12 @@ void DeleteOrNot()
 			}
 			if (chapters == 0) //айтема нет в чаптерах
 			{
-				texture.TD_exist_in_CH = "-";
+				texture->TD_exist_in_CH = "-";
 				_delete = true;
 			}
 			else //айтем есть в чаптерах
 			{
-				texture.TD_exist_in_CH = "+";
+				texture->TD_exist_in_CH = "+";
 			}
 		}
 		else
@@ -835,9 +811,9 @@ void DeleteOrNot()
 			_delete = true;
 		}
 
-		if (_delete && texture.TD_effects.empty())
+		if (_delete && texture->TD_effects.empty())
 		{
-			texture.TD_to_delete = true;
+			texture->TD_to_delete = true;
 		}
 
 	}
@@ -881,6 +857,8 @@ void GetAttributes(ChapterData& ch)
 	ch.chData_text_iso_z = GetAttr_CH(before_data_id, "\"z\":");
 }
 
+
+#pragma endregion
 /////отметить мертвые эффекты
 void Get_dead_effects()
 {
@@ -938,7 +916,7 @@ void Get_dead_effects()
 }
 
 //удалить запись из GamefieldResources по имени текстуры
-void DeleteFromGamefieldResources(TextureData* td)
+void DeleteFromGamefieldResources(TextureData& td)
 {	
 	bool brk = false;
 	std::string static_text = "/static/";
@@ -950,7 +928,7 @@ void DeleteFromGamefieldResources(TextureData* td)
 	fs::path	GR_root;
 	std::string GR_id;
 
-	for (auto& gr : td->TD_GRs)
+	for (auto& gr : td.TD_GRs)
 	{	
 		brk = false;
 		for (tinyxml2::XMLElement* Textures_group = resources->FirstChildElement(); Textures_group != NULL; Textures_group = Textures_group->NextSiblingElement())
@@ -984,19 +962,14 @@ void DeleteFromGamefieldResources(TextureData* td)
 	}
 }
 
-//удалить запись из ObjectLibrary по item (в каждом ObjectLibrary)
-void DeleteFromObjectLibrary(TextureData* td)
+//удалить все лееры данной текстуры (в каждом ObjectLibrary)
+void DeleteFromObjectLibrary(TextureData& td)
 {	
 	bool brk = false;
-	for (auto& gr : td->TD_GRs)
+	//удаляем айтемы, которыми владеет GR
+	for (auto& gr : td.TD_GRs)
 	{	
-		brk = false;
-		//все items в которых юзается текстура
-		//убрать повторяющиеся леера, оставить уникальные
-		std::sort(gr->gameFieldRes_ObjLibLayers.begin(), gr->gameFieldRes_ObjLibLayers.end());
-		auto last = std::unique(gr->gameFieldRes_ObjLibLayers.begin(), gr->gameFieldRes_ObjLibLayers.end());
-
-		for (auto& item = gr->gameFieldRes_ObjLibLayers.begin(); item != last; item++)
+		for (auto& item = gr->gameFieldRes_unique_items.begin(); item != gr->gameFieldRes_unique_items.end(); item++)
 		{
 			for (auto& obj_file : ObjLib_files)
 			{	
@@ -1008,54 +981,76 @@ void DeleteFromObjectLibrary(TextureData* td)
 
 				for (tinyxml2::XMLElement* Objects = ObjectLibrarySchemeElement->FirstChildElement(); Objects != NULL; Objects = Objects->NextSiblingElement())
 				{
-
 					for (tinyxml2::XMLElement* item_node = Objects->FirstChildElement(); item_node != NULL; item_node = item_node->NextSiblingElement())
 					{
-
-						if ((*item)->objLayer_item->objItem_item_id == item_node->Attribute("id"))
+						if (item_node->Attribute("id") == (*item)->objItem_item_id)
 						{
 							Objects->DeleteChild(item_node);
 							ObjectLibtary_doc.SaveFile(obj_file.string().c_str());
 							brk = true;
 							break;
 						}
-						
 					}
-					if (brk)
-						break;
+					if (brk) break;
 				}
+				
 			}
 		}
 	}
 }
 
-//найти TextureData в контейнере
-TextureData* FindTexture(fs::path texture_path)
+//удалить item без лееров (в каждом ObjectLibrary)
+void DeleteNoLayersItem()
 {
-	auto& it_td = std::find_if(textures.begin(), textures.end(),
-		[&](const TextureData& td)
+			for (auto& obj_file : ObjLib_files)
+			{
+				tinyxml2::XMLDocument ObjectLibtary_doc;
+				ObjectLibtary_doc.LoadFile(obj_file.string().c_str());
+
+				tinyxml2::XMLElement* ObjectLibrarySchemeElement = ObjectLibtary_doc.FirstChildElement();
+
+				for (tinyxml2::XMLElement* Objects = ObjectLibrarySchemeElement->FirstChildElement(); Objects != NULL; Objects = Objects->NextSiblingElement())
+				{
+
+					for (tinyxml2::XMLElement* item_node = Objects->FirstChildElement(); item_node != NULL; item_node = item_node->NextSiblingElement())
+					{	
+						if(item_node->NoChildren())
+							Objects->DeleteChild(item_node);
+							//ObjectLibtary_doc.SaveFile(obj_file.string().c_str());
+					}
+				}
+				ObjectLibtary_doc.SaveFile(obj_file.string().c_str());
+			}
+}
+
+//найти TextureData в контейнере
+TexturePtr FindTexture(fs::path texture_path)
+{
+	auto it_td = std::find_if(textures.begin(), textures.end(),
+		[&](const TexturePtr& td)
 	{
-		return fs::equivalent(texture_path, td.TD_texture_name);
+		return fs::equivalent(texture_path, td->TD_texture_name);
 	});
 
 	if (it_td == textures.end())
 		return nullptr;
 	else
-	{
-		const TextureData *it2 = &(*it_td);
+	{	
+		return *it_td;
+
+		/*const TextureData *it2 = &(*it_td);
 		TextureData& it3 = const_cast<TextureData&>(*it2);
 		TextureData* p = &it3;
-		return p;
-		//return &(*it_td);
+		return p;*/
 	}
 		
 }
 
 //найти ParticleEffect в контейнере
-ParticleEffect* FindEffect(fs::path effect_path)
+ParticleEffectPtr FindEffect(fs::path effect_path)
 {
 	auto& it_td = std::find_if(particle_effects.begin(), particle_effects.end(),
-		[&](ParticleEffect* ef)
+		[&](const ParticleEffectPtr& ef)
 	{
 		return fs::equivalent(effect_path, ef->partEff_name_p);
 	});
@@ -1076,10 +1071,10 @@ ParticleEffect* FindEffect(fs::path effect_path)
 
 void RemoveProblems()
 {
-	for (auto& it_td = textures.begin(); it_td != textures.end(); it_td++)
-	{
-		it_td->TD_problem = false;
-	}
+	//for (auto& it_td = textures.begin(); it_td != textures.end(); it_td++)
+	//{
+	//	it_td->TD_problem = false;
+	//}
 }
 
 
@@ -1176,9 +1171,9 @@ void OL_Clusters_in_one_string()
 
 	for (auto& texture : textures)
 	{
-		if (!texture.TD_GRs.empty())
+		if (!texture->TD_GRs.empty())
 		{	
-			for (auto& gr : texture.TD_GRs)
+			for (auto& gr : texture->TD_GRs)
 			{
 				if (!gr->gameFieldRes_unique_items.empty())
 				{
@@ -1189,16 +1184,14 @@ void OL_Clusters_in_one_string()
 
 					for (auto& obj : clusters)
 					{
-						texture.TD_clusters_OL += obj;
-						texture.TD_clusters_OL += " ";
+						texture->TD_clusters_OL += obj;
+						texture->TD_clusters_OL += " ";
 					}
 				}
 			}
 		}
 	}
 }
-
-
 /////////////сравнить 2 папки, вернуть файлы(пути) 2 папки, которых нет в первой
 std::set<std::string> Compare2Folder(const std::string path1, const std::string path2)
 {	
@@ -1516,9 +1509,4 @@ void FillRepairsAndSteps()
 	}
 }
 
-
-
-
-
-
-
+}

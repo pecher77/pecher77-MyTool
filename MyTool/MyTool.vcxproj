@@ -96,6 +96,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;BOOST_FILESTYSTEM_NO_DEPRCATED</PreprocessorDefinitions>
       <ShowIncludes>true</ShowIncludes>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies />
@@ -118,6 +120,8 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;BOOST_FILESTYSTEM_NO_DEPRCATED</PreprocessorDefinitions>
       <ShowIncludes>true</ShowIncludes>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies />
@@ -146,15 +150,21 @@
   <ItemGroup>
     <ClCompile Include="ChangeCHAttrib.cpp" />
     <ClCompile Include="chapter_editor.cpp" />
+    <ClCompile Include="Core.cpp" />
     <ClCompile Include="Details.cpp" />
     <ClCompile Include="Effects_table.cpp" />
     <ClCompile Include="Effect_detail.cpp" />
     <ClCompile Include="loading.cpp" />
-    <ClCompile Include="Macro.cpp" />
     <ClCompile Include="MyForm2.cpp" />
     <ClCompile Include="MyForm3.cpp" />
     <ClCompile Include="Optimize.cpp" />
     <ClCompile Include="MyForm.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pch.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,7 +184,7 @@
     <ClInclude Include="loading.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="Macro.h" />
+    <ClInclude Include="Core.h" />
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -185,6 +195,7 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="Optimize.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
