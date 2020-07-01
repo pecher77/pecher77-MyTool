@@ -9,10 +9,12 @@ namespace MyTool {
 	std::string path_gamefield_resources;
 	std::string path_CH_FirstGarden_save_to;
 	std::string path_texture_folder;
-	std::string path_game_folder;
+	std::string path_game_folder = "D:/Projects/Mystery_Garden";
 	std::string path_repair_path;
 	std::string project_name;
 	std::string path_base_mm;
+
+	bool collected = false;
 
 	int error_counter;
 	int deleting_count;
@@ -40,8 +42,8 @@ namespace MyTool {
 	char ch_attrib_operation;
 
 
-	bool cancelExecution;
-	int res_count;
+	bool cancelExecution = false;
+	int res_count; //счетких ресурсов
 
 	//template<class T>
 	//std::string to_string(const T& t)

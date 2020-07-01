@@ -294,8 +294,8 @@ namespace MyTool {
 			row[1] = MRSHL_stdstr_TO_Str(it->chData_storyInfo_chapter_id);
 			row[2] = MRSHL_stdstr_TO_Str(it->chData_storyInfo_repair);
 			row[3] = MRSHL_stdstr_TO_Str(it->chData_storyInfo_step);
-			row[4] = MRSHL_stdstr_TO_Str(it->chData_id);
-			row[5] = MRSHL_stdstr_TO_Str(it->chData_text_dataid);
+			row[4] = MRSHL_stdstr_TO_Str(it->chData_hashid);
+			row[5] = MRSHL_stdstr_TO_Str(it->chData_dataid);
 			row[6] = MRSHL_stdstr_TO_Str(it->chData_text_x);
 			row[7] = MRSHL_stdstr_TO_Str(it->chData_text_y);
 			row[8] = MRSHL_stdstr_TO_Str(it->chData_text_m);
@@ -307,7 +307,7 @@ namespace MyTool {
 			row[12] = MRSHL_stdstr_TO_Str(it->chData_ObjLibItem->objItem_instanceClass);//12 instanceClass
 			row[13] = MRSHL_stdstr_TO_Str(it->chData_ObjLibItem->objItem_isIndoor);//13 OL_isIndoor
 			row[14] = MRSHL_stdstr_TO_Str(it->chData_ObjLibItem->objItem_noRedesignDeformation);//12 noRedesignDeformation
-
+											
 			row[15] = MRSHL_stdstr_TO_Str(it->chData_text_iso_uL);
 			row[16] = MRSHL_stdstr_TO_Str(it->chData_text_iso_uR);
 			row[17] = MRSHL_stdstr_TO_Str(it->chData_text_iso_x);

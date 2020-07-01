@@ -1,6 +1,8 @@
 #pragma once
 
-//#include "tinyxml2.h"
+#include "Core.h"
+#include "tinyxml2.h"
+
 
 namespace MyTool {
 
@@ -9,58 +11,95 @@ namespace MyTool {
 
 	namespace fs = boost::filesystem;
 
+	extern unsigned int texture_deleted;
+	extern unsigned int texture_deleted_size;
+	extern unsigned int resources_texture_deleted;
+	extern unsigned int resources_texture_deleted_size;
+	extern unsigned int OL_items_deleted;
+
+	//template<class T>
+	//void PrintToLogFile(T begin, T end, std::string log_path);
+
+	/////////////////////////////////
+	class TextureData;
+	class TextureAura;
+	class ChapterData;
+	class ObjLibItem;
+	class ObjLibLayer;
+	class ParticleEffect;
+	class ParticleEffectLayer;
+	class GameFieldRes;
+	class CH_ParticleEffect;
+
+
+	extern std::set<TextureData*>			static_textures;
+	extern std::set<TextureData*>			aura_textures;
+
+
+	extern std::multiset<GameFieldRes*>		GameField_static_textures;
+	extern std::multiset<GameFieldRes*>		GameField_aura_textures;
+
+
+	extern std::multiset<ObjLibItem*>		ObjLib_items;
+
+	extern std::multiset<ObjLibLayer*>		ObjLib_layer_textures;
+	extern std::multiset<ObjLibLayer*>		ObjLib_layer_xml_effects;
+	extern std::multiset<ObjLibLayer*>		ObjLib_layer_swl_effects;
+	extern std::multiset<ObjLibLayer*>		ObjLib_layer_light_effects;
+	extern std::multiset<ObjLibLayer*>		ObjLib_layer_light_aura;
+	extern std::multiset<ObjLibLayer*>		ObjLib_layer_lights;
 	
+	
+	
+	extern std::multiset<ChapterData*>		CH_objects;
+	extern std::multiset<ParticleEffect*>		particle_effects_XML;
+	//extern std::multiset<ParticleEffect*>		particle_completed_repair_effects_SWL;
+	extern std::set<ParticleEffectLayer*>	particle_effect_layers;
 
-	template<class T>
-	void PrintToLogFile(T begin, T end, std::string log_path);
-
-	//////////////////Декларирования
-	struct TextureData;
-	struct ChapterData;
-	struct ObjLibItem;
-	struct ObjLibLayer;
-	struct ParticleEffect;
-	struct ParticleEffectLayer;
-	struct GameFieldRes;
-	struct CH_ParticleEffect;
-
-	typedef std::shared_ptr<TextureData> TexturePtr;
-	typedef std::shared_ptr<ChapterData> ChapterDataPtr;
-	typedef std::shared_ptr<ObjLibItem> ObjLibItemPtr;
-	typedef std::shared_ptr<ObjLibLayer> ObjLibLayerPtr;
-	typedef std::shared_ptr<ParticleEffect> ParticleEffectPtr;
-	typedef std::shared_ptr<ParticleEffectLayer> ParticleEffectLayerPtr;
-	typedef std::shared_ptr<GameFieldRes> GameFieldResPtr;
-
-	extern std::set<TexturePtr>				textures;
-	extern std::multiset<GameFieldResPtr>		GameField_objects;
-	extern std::multiset<ObjLibItemPtr>		ObjLib_items;
-	extern std::multiset<ObjLibLayerPtr>		ObjLib_layers;
-	extern std::multiset<ChapterDataPtr>		CH_objects;
-	extern std::set<ParticleEffectPtr>			particle_effects;
 
 	extern std::vector<fs::path>				problem_textures_path;
-	extern std::multiset<CH_ParticleEffect>	meta_particle_repair_effects;
+	extern std::multiset<CH_ParticleEffect>		meta_particle_repair_effects;
 
 	extern std::multimap<fs::path, fs::path>	texture_particle_effect; //текстура, эффект
 
-	struct GameFieldRes
+
+	enum class TextureType
+	{
+		STATIC = 0, AURA
+	};
+
+	enum class LayerType
+	{
+		TEXTURE=0, EFFECT_XML, EFFECT_SWL_OR_SPINE, LIGHT_WITH_EFFECT, LIGHT_WITH_AURA, LIGHT
+	};
+
+	enum class ParticleEffectLayerTexture
+	{
+		PARTICLE = 0, STATIC, AURA, OTHER
+	};
+
+	class GameFieldRes
 	{
 	public:
-		//bool exist_file = false;
-		GameFieldRes() {}
-		~GameFieldRes() { std::cout << "GameFieldRes destructor called on " << this << " " << gameFieldRes_id << std::endl; }
+		
+		GameFieldRes::GameFieldRes(std::string&& path, tinyxml2::XMLElement* group_node, tinyxml2::XMLElement* item_node, TextureType type);
+		~GameFieldRes();
+
+		
+		std::string  gameFieldRes_s_full_path; // для сортировки сета
+
+		TextureType gameFieldRes_type;
+
+		std::string	 gameFieldRes_group; //атлас
 
 		std::string  gameFieldRes_id; //используется ObjectLibrary.xml
-		std::string gameFieldRes_path_attr; //имя файла
-		std::string  gameFieldRes_path; //для удаления записи из геймфилда
-		fs::path  gameFieldRes_full_path;
-		std::string  gameFieldRes_s_full_path; // для сета
-		std::string  gameFieldRes_texture_group_atlas; //атлас
+		std::string  gameFieldRes_path_attr; //имя файла
+		std::string  gameFieldRes_group_path; //для удаления
 
-		TexturePtr  gameFieldRes_TextureData;
-		std::vector <ObjLibLayerPtr>  gameFieldRes_ObjLibLayers; //лейеры которые составляет данный GameFieldRes
-		std::set <ObjLibItemPtr> gameFieldRes_unique_items; //все айтемы, в которых данный GameFieldRes
+		bool gameFieldRes_exist_in_OL;
+		
+		TextureData*  gameFieldRes_TextureData = nullptr;
+		std::vector <ObjLibLayer*>  gameFieldRes_ObjLibLayers ; //лейеры которые составляет данный GameFieldRes
 
 		bool operator <(const GameFieldRes& other)
 		{
@@ -78,31 +117,45 @@ namespace MyTool {
 			}
 			else return false;
 		}
+		bool operator ==(const GameFieldRes& other)
+		{	
+			if (this->gameFieldRes_s_full_path == other.gameFieldRes_s_full_path)
+				return true;
+			else return false;
+		}
+		bool operator ==(const GameFieldRes& other) const
+		{
+			if (this->gameFieldRes_s_full_path == other.gameFieldRes_s_full_path)
+				return true;
+			else return false;
+		}
 
 	};
 
-	struct ObjLibLayer //<layer type="texture" name="texture" texture="cl1_flowerbed_porch_var2_flower4" xOffset="-80" yOffset="-30" xMin="-40" yMin="-40" zMin="0" xMax="40" yMax="40" zMax="44" />
+	class ObjLibLayer //<layer type="texture" name="texture" texture="cl1_flowerbed_porch_var2_flower4" xOffset="-80" yOffset="-30" xMin="-40" yMin="-40" zMin="0" xMax="40" yMax="40" zMax="44" />
 	{	
-		ObjLibLayer() {}
-		~ObjLibLayer() { std::cout << "ObjLibLayer destructor called on " << this << " " << objLayer_texture << std::endl; }
+	public:
+		ObjLibLayer(ObjLibItem* obj_item, tinyxml2::XMLElement* layer_node);
+		~ObjLibLayer();
 
-		std::string objLayer_texture; //texture="cl1_flowerbed_porch_var2_flower4"
-		std::string objLayer_type; //type="texture"
-		std::string objLayer_zOrder = "-"; //
+		std::string objLayer_texture_attr; //texture="cl1_flowerbed_porch_var2_flower4"
 
-		GameFieldResPtr objLayer_GameFieldRes; //= nullptr; //
-		ObjLibItemPtr objLayer_item; //= nullptr; //item где присутствует данный лейер
-		ParticleEffectPtr objItem_ParticleEffect; //= nullptr; //если лейер - партикловый комплит эффект = type="effect" или type="light"
+		LayerType objLayer_type; //type="texture"//light//effect
+
+		std::string objLayer_name; //name="texture" || name="spine" || name="clock"
+
+		std::string objLayer_zOrder; //
+
+		std::string objLayer_aura;
+
+		GameFieldRes* objLayer_GameFieldRes; // только если type="texture" или type="effect" и name="spine" или type="light" и есть aura. ParticleEffects(не swl) нет в GameFieldRes
+		ObjLibItem* objLayer_item; //item где присутствует данный лейер
+		ParticleEffect* objLayer_ParticleEffect; //если type="effect"  или type="light" и есть texture
 
 		bool operator ==(const ObjLibLayer& other)
 		{
 			if (
-				this->objLayer_texture == other.objLayer_texture &&
-				this->objLayer_type == other.objLayer_type &&
-				this->objLayer_zOrder == other.objLayer_zOrder &&
-				this->objLayer_GameFieldRes == other.objLayer_GameFieldRes &&
-				this->objLayer_item == other.objLayer_item &&
-				this->objItem_ParticleEffect == other.objItem_ParticleEffect
+				this->objLayer_texture_attr == other.objLayer_texture_attr
 				)
 				return true;
 			else return false;
@@ -110,19 +163,14 @@ namespace MyTool {
 		bool operator ==(const ObjLibLayer& other) const
 		{
 			if (
-				this->objLayer_texture == other.objLayer_texture &&
-				this->objLayer_type == other.objLayer_type &&
-				this->objLayer_zOrder == other.objLayer_zOrder &&
-				this->objLayer_GameFieldRes == other.objLayer_GameFieldRes &&
-				this->objLayer_item == other.objLayer_item &&
-				this->objItem_ParticleEffect == other.objItem_ParticleEffect
+				this->objLayer_texture_attr == other.objLayer_texture_attr
 				)
 				return true;
 			else return false;
 		}
 		bool operator <(const ObjLibLayer& other)
 		{
-			if (this->objLayer_texture < other.objLayer_texture)
+			if (this->objLayer_texture_attr < other.objLayer_texture_attr)
 			{
 				return true;
 			}
@@ -130,7 +178,7 @@ namespace MyTool {
 		}
 		bool operator <(const ObjLibLayer& other) const
 		{
-			if (this->objLayer_texture < other.objLayer_texture)
+			if (this->objLayer_texture_attr < other.objLayer_texture_attr)
 			{
 				return true;
 			}
@@ -138,18 +186,25 @@ namespace MyTool {
 		}
 	};
 
-	struct ObjLibItem //<item id="flowerbed_porch_var3_flower1" noRedesignDeformation="true">
-	{
-		~ObjLibItem() { std::cout << "ObjLibItem destructor called on " << this << " " << objItem_item_id << std::endl; }
+	class ObjLibItem //<item id="flowerbed_porch_var3_flower1" noRedesignDeformation="true">
+	{	
+	public:
+		~ObjLibItem();
+		//если удаляю - objItem_ChapterDatas пустая
+
+		
+		ObjLibItem(fs::path path, tinyxml2::XMLElement* item_node, tinyxml2::XMLElement* objects_node);
+
 		std::string objItem_item_id;
-		std::string objItem_cluster;
 		std::string objItem_instanceClass;
-		std::string objItem_zOrder_attr; //??
 		std::string objItem_defaultZOrder;
 		std::string objItem_isIndoor;
+		std::string objItem_cluster;
 		std::string objItem_noRedesignDeformation;
-		std::vector<ObjLibLayerPtr> objItem_layers; //лейеры из которых состоит item
-		std::vector<ChapterDataPtr> objItem_ChapterDatas; //чаптеры где находится айтем
+		std::vector<ObjLibLayer*> objItem_layers; //лейеры из которых состоит item
+		std::vector<ChapterData*> objItem_ChapterDatas; //чаптеры где находится айтем
+
+		bool objItem_exist_on_meta;
 
 		bool operator <(const ObjLibItem& other)
 		{
@@ -173,7 +228,6 @@ namespace MyTool {
 				this->objItem_item_id == other.objItem_item_id					&&
 				this->objItem_cluster == other.objItem_cluster					&&
 				this->objItem_instanceClass == other.objItem_instanceClass			&&
-				this->objItem_zOrder_attr == other.objItem_zOrder_attr				&&
 				this->objItem_defaultZOrder == other.objItem_defaultZOrder			&&
 				this->objItem_isIndoor == other.objItem_isIndoor				&&
 				this->objItem_noRedesignDeformation == other.objItem_noRedesignDeformation	&&
@@ -191,7 +245,6 @@ namespace MyTool {
 				this->objItem_item_id == other.objItem_item_id					&&
 				this->objItem_cluster == other.objItem_cluster					&&
 				this->objItem_instanceClass == other.objItem_instanceClass			&&
-				this->objItem_zOrder_attr == other.objItem_zOrder_attr				&&
 				this->objItem_defaultZOrder == other.objItem_defaultZOrder			&&
 				this->objItem_isIndoor == other.objItem_isIndoor				&&
 				this->objItem_noRedesignDeformation == other.objItem_noRedesignDeformation	&&
@@ -204,17 +257,27 @@ namespace MyTool {
 		}
 	};
 
-	struct ChapterData
-	{
-		~ChapterData() { std::cout << "ChapterData destructor called on " << this << " " << chData_text_dataid << std::endl; }
+	class ChapterData
+	{	
+	public:
+		~ChapterData() { }
+
+		ChapterData(fs::path ch_file,
+			std::string hashid,
+			std::string text_node,
+			std::string storyInfo_chapter_id,
+			std::string storyInfo_repair,
+			std::string storyInfo_step);
 		// сортировка по dataid
 		//std::string CH_chapter_id_CH_repair_CH_step_СH_id_CH_dataid; //чаптер + рипейр + степ + хешайди + текст - адская хрень для сортировки в сете
-		std::string chData_text_dataid;
-		std::string chData_text;
+		fs::path chData_file;
+		std::string chData_hashid;
+		std::string chData_dataid;
+		std::string chData_text_node;
 		std::string chData_storyInfo_chapter_id;
 		std::string chData_storyInfo_repair;
 		std::string chData_storyInfo_step;
-		std::string chData_id;
+		
 
 		std::string chData_text_iso_uL = "-";
 		std::string chData_text_iso_uR = "-";
@@ -228,11 +291,11 @@ namespace MyTool {
 		std::string chData_text_y;
 		std::string chData_text_zOrder;
 
-		ObjLibItemPtr chData_ObjLibItem;
+		ObjLibItem* chData_ObjLibItem; //вдруг имена айтемов могут повторяться в разных файлах ObjectLibrary (в разных кластерах)
 
 		bool operator <(const ChapterData& other)
 		{
-			if (this->chData_text_dataid < other.chData_text_dataid)
+			if (this->chData_dataid < other.chData_dataid)
 			{
 				return true;
 			}
@@ -240,7 +303,7 @@ namespace MyTool {
 		}
 		bool operator <(const ChapterData& other) const
 		{
-			if (this->chData_text_dataid < other.chData_text_dataid)
+			if (this->chData_dataid < other.chData_dataid)
 			{
 				return true;
 			}
@@ -249,13 +312,14 @@ namespace MyTool {
 		bool operator ==(const ChapterData& other)
 		{
 			if
-				(
-					this->chData_text_dataid == other.chData_text_dataid &&
-					this->chData_text == other.chData_text &&
+				(	
+					this->chData_file == other.chData_file &&
+					this->chData_dataid == other.chData_dataid &&
+					this->chData_text_node == other.chData_text_node &&
 					this->chData_storyInfo_chapter_id == other.chData_storyInfo_chapter_id &&
 					this->chData_storyInfo_repair == other.chData_storyInfo_repair &&
 					this->chData_storyInfo_step == other.chData_storyInfo_step &&
-					this->chData_id == other.chData_id &&
+					this->chData_hashid == other.chData_hashid &&
 					this->chData_text_iso_uL == other.chData_text_iso_uL &&
 					this->chData_text_iso_uR == other.chData_text_iso_uR &&
 					this->chData_text_iso_x == other.chData_text_iso_x &&
@@ -279,13 +343,14 @@ namespace MyTool {
 		bool operator ==(const ChapterData& other) const
 		{
 			if
-				(
-					this->chData_text_dataid == other.chData_text_dataid &&
-					this->chData_text == other.chData_text &&
+				(	
+					this->chData_file == other.chData_file &&
+					this->chData_dataid == other.chData_dataid &&
+					this->chData_text_node == other.chData_text_node &&
 					this->chData_storyInfo_chapter_id == other.chData_storyInfo_chapter_id &&
 					this->chData_storyInfo_repair == other.chData_storyInfo_repair &&
 					this->chData_storyInfo_step == other.chData_storyInfo_step &&
-					this->chData_id == other.chData_id &&
+					this->chData_hashid == other.chData_hashid &&
 					this->chData_text_iso_uL == other.chData_text_iso_uL &&
 					this->chData_text_iso_uR == other.chData_text_iso_uR &&
 					this->chData_text_iso_x == other.chData_text_iso_x &&
@@ -309,81 +374,59 @@ namespace MyTool {
 
 	};
 
-	struct CH_ParticleEffect
-	{
-		std::string CH_PE_name; // сортировка имя
-		std::string CH_PE_chapter;
-		std::string CH_PE_repair;
-		std::string CH_PE_step;
-
-		bool operator ==(const CH_ParticleEffect& other)
+	class ParticleEffect
+	{	
+	public:
+		~ParticleEffect() 
 		{
-			if (
-				this->CH_PE_name == other.CH_PE_name &&
-				this->CH_PE_chapter == other.CH_PE_chapter &&
-				this->CH_PE_repair == other.CH_PE_repair &&
-				this->CH_PE_step == other.CH_PE_step
-				)
-				return true;
-			else return false;
-		}
-		bool operator ==(const CH_ParticleEffect& other) const
-		{
-			if (
-				this->CH_PE_name == other.CH_PE_name &&
-				this->CH_PE_chapter == other.CH_PE_chapter &&
-				this->CH_PE_repair == other.CH_PE_repair &&
-				this->CH_PE_step == other.CH_PE_step
-				)
-				return true;
-			else return false;
-		}
-		bool operator < (const CH_ParticleEffect& other)
-		{
-			if (this->CH_PE_name < other.CH_PE_name)
-			{
-				return true;
-			}
-			else return false;
-		}
-		bool operator < (const CH_ParticleEffect& other) const
-		{
-			if (this->CH_PE_name < other.CH_PE_name)
-			{
-				return true;
-			}
-			else return false;
+			LOG_IN_FILE("ParticleEffect destructor");
 		}
 
-	};
+		ParticleEffect(std::string&& path, std::string&& name);
 
-	struct ParticleEffect
-	{
-		~ParticleEffect() { std::cout << "ParticleEffect destructor called on " << this << " " << partEff_name_s << std::endl; }
+		std::string partEff_string_path; // путь xml файла стринг (для сортировки сета)
+		std::string partEff_name;
+		//fs::path partEff_path; // путь xml файла паз
 
-		std::string partEff_name_s; // путь xml файла стринг (для сортировки сета)
-		fs::path partEff_name_p; // путь xml файла паз
-		std::string partEff_type; // repair, complited or other
 		std::string partEff_cluster; // кластер где лежит
 
-		std::string partEff_exist_in_CH = "-"; //есть ли на мете
-		mutable std::string partEff_dead = "-";
+		bool partEff_exist_on_meta; //есть ли на мете
+		bool partEff_exist_in_OL; //есть ли в ObjectLibrary
+
+		mutable std::string partEff_dead;
 		mutable bool partEff_to_delete = false;
-		std::vector<ObjLibLayerPtr> partEff_ObjLibLayers; //лееры где он есть зачем?
-		std::vector<ParticleEffectLayerPtr>partEff_ParticleEffectLayers; //все слои <ParticleSystem> - текстуры эффекта
+
+		std::vector<ParticleEffectLayer*>partEff_ParticleEffectLayers; //все слои <ParticleSystem> - текстуры эффекта
+		std::vector<ObjLibLayer*> partEff_ObjLibLayers; //items где он есть зачем?
+
+		static std::string GetClusterName(const std::string& path)
+		{
+			int pos = path.find("cluster");
+			if (pos != -1)
+			{
+				std::string name;
+				
+				while (path[pos] != '/' && path[pos] != '\\')
+				{
+					name += path[pos];
+					pos++;
+				}
+				return name;
+			}
+			else return "base_mm/effects";
+		}
 
 		bool operator ==(const ParticleEffect& other)
 		{
 			if (
-				this->partEff_name_s == other.partEff_name_s &&
-				this->partEff_name_p == other.partEff_name_p &&
-				this->partEff_type == other.partEff_type &&
-				this->partEff_cluster == other.partEff_cluster &&
-				this->partEff_exist_in_CH == other.partEff_exist_in_CH &&
-				this->partEff_dead == other.partEff_dead &&
-				this->partEff_to_delete == other.partEff_to_delete &&
-				this->partEff_ObjLibLayers == other.partEff_ObjLibLayers &&
-				this->partEff_ParticleEffectLayers == other.partEff_ParticleEffectLayers
+				this->partEff_string_path == other.partEff_string_path										&&
+				this->partEff_name == other.partEff_name								  &&
+				this->partEff_cluster == other.partEff_cluster								  &&
+				this->partEff_exist_on_meta == other.partEff_exist_on_meta						  &&
+				this->partEff_dead == other.partEff_dead									  &&
+				this->partEff_to_delete == other.partEff_to_delete							  &&
+				this->partEff_ObjLibLayers == other.partEff_ObjLibLayers					  &&
+				this->partEff_ParticleEffectLayers == other.partEff_ParticleEffectLayers	  
 				)
 				return true;
 			else return false;
@@ -391,14 +434,13 @@ namespace MyTool {
 		bool operator ==(const ParticleEffect& other) const
 		{
 			if (
-				this->partEff_name_s == other.partEff_name_s &&
-				this->partEff_name_p == other.partEff_name_p &&
-				this->partEff_type == other.partEff_type &&
-				this->partEff_cluster == other.partEff_cluster &&
-				this->partEff_exist_in_CH == other.partEff_exist_in_CH &&
-				this->partEff_dead == other.partEff_dead &&
-				this->partEff_to_delete == other.partEff_to_delete &&
-				this->partEff_ObjLibLayers == other.partEff_ObjLibLayers &&
+				this->partEff_string_path == other.partEff_string_path										&&
+				this->partEff_name == other.partEff_name								  &&
+				this->partEff_cluster == other.partEff_cluster								  &&
+				this->partEff_exist_on_meta == other.partEff_exist_on_meta						  &&
+				this->partEff_dead == other.partEff_dead									  &&
+				this->partEff_to_delete == other.partEff_to_delete							  &&
+				this->partEff_ObjLibLayers == other.partEff_ObjLibLayers					  &&
 				this->partEff_ParticleEffectLayers == other.partEff_ParticleEffectLayers
 				)
 				return true;
@@ -406,7 +448,7 @@ namespace MyTool {
 		}
 		bool operator < (const ParticleEffect& other)
 		{
-			if (this->partEff_name_s < other.partEff_name_s)
+			if (this->partEff_name < other.partEff_name)
 			{
 				return true;
 			}
@@ -414,7 +456,7 @@ namespace MyTool {
 		}
 		bool operator < (const ParticleEffect& other) const
 		{
-			if (this->partEff_name_s < other.partEff_name_s)
+			if (this->partEff_name < other.partEff_name)
 			{
 				return true;
 			}
@@ -422,21 +464,26 @@ namespace MyTool {
 		}
 	};
 
-	struct ParticleEffectLayer
+	class ParticleEffectLayer
 	{
-		~ParticleEffectLayer() { std::cout << "ParticleEffectLayer destructor called on " << this << " " << effectLayer_effectTexture_path_s << std::endl; }
+	public:
+		~ParticleEffectLayer() {}
 
-		std::string effectLayer_effectTexture_path_s; //путь текстуры стринг
-		fs::path effectLayer_effectTexture_path_p; //путь текстуры паз
+		ParticleEffectLayer(std::string&& path, ParticleEffect* effect); //конструктор
+			
+		std::string effectLayer_path; //путь текстуры стринг
+		//fs::path effectLayer_path;
+		bool effectLayer_file_exist; //существует ли файл текстуры
 
-		TexturePtr effectLayer_TextureData; //ссылка на текстуру
-		std::string effectLayer_file_exist = "-"; //существует ли файл текстуры
+		ParticleEffectLayerTexture effectLayer_texture_type;
 
+		ParticleEffect* effectLayer_parent_effect; //эффект-родитель
+		TextureData* effectLayer_TextureData; //ссылка на текстуру
+		
 		bool operator ==(const ParticleEffectLayer& other)
 		{
 			if (
-				this->effectLayer_effectTexture_path_s == other.effectLayer_effectTexture_path_s &&
-				this->effectLayer_effectTexture_path_p == other.effectLayer_effectTexture_path_p &&
+				this->effectLayer_path == other.effectLayer_path &&
 				this->effectLayer_TextureData == other.effectLayer_TextureData &&
 				this->effectLayer_file_exist == other.effectLayer_file_exist
 				)
@@ -446,8 +493,7 @@ namespace MyTool {
 		bool operator ==(const ParticleEffectLayer& other) const
 		{
 			if (
-				this->effectLayer_effectTexture_path_s == other.effectLayer_effectTexture_path_s &&
-				this->effectLayer_effectTexture_path_p == other.effectLayer_effectTexture_path_p &&
+				this->effectLayer_path == other.effectLayer_path &&
 				this->effectLayer_TextureData == other.effectLayer_TextureData &&
 				this->effectLayer_file_exist == other.effectLayer_file_exist
 				)
@@ -456,7 +502,7 @@ namespace MyTool {
 		}
 		bool operator < (const ParticleEffectLayer& other)
 		{
-			if (this->effectLayer_effectTexture_path_s < other.effectLayer_effectTexture_path_s)
+			if (this->effectLayer_path < other.effectLayer_path)
 			{
 				return true;
 			}
@@ -464,7 +510,7 @@ namespace MyTool {
 		}
 		bool operator < (const ParticleEffectLayer& other) const
 		{
-			if (this->effectLayer_effectTexture_path_s < other.effectLayer_effectTexture_path_s)
+			if (this->effectLayer_path < other.effectLayer_path)
 			{
 				return true;
 			}
@@ -472,41 +518,38 @@ namespace MyTool {
 		}
 	};
 
-	struct TextureData
+	class TextureData
 	{
-		~TextureData() { std::cout << "TextureData destructor called on " << this << " " << TD_s_texture_name << std::endl; }
+	public:
+		~TextureData();
 
-		std::string TD_s_texture_name; //полный путь файла с именем стринг
-		fs::path	TD_texture_name; //путь файла с именем
+		TextureData(fs::path path, TextureType type);
 
-		//cluster где юзается (ObjectLibrary, где юзается)
-		mutable std::string TD_clusters_OL;
-		mutable std::string TD_clusters_EF;
+		std::string TD_texture_name; //полный путь файла с именем стринг (для сортировки сета)
+		fs::path	TD_path; //путь файла с именем
 
-		mutable std::set <GameFieldResPtr> TD_GRs; //TODO ???? почему сет? для текстуры только 1 запись в Gamefield_Resources.xml
-		//GameFieldResPtr TD_GR;
-		mutable std::string TD_exist_in_GR = "-";
-
-		//mutable std::vector<ObjLibItem*> TD_ObjLib_objects; //для одной текстуры может быть множество объектов в ObjectLibrary.xml
-
-		mutable std::string TD_exist_in_OL = "-";
-		//mutable std::vector <ChapterIds> TD_Chapter_dataids;
-
-		mutable std::string TD_exist_in_EF = "-";
-		mutable std::set <ParticleEffectPtr> TD_effects;
-
-		mutable std::string TD_exist_in_CH = "-";
-
-		mutable std::string TD_EF_exist_in_CH = "-";
-
-		mutable bool TD_problem = false;
+		TextureType TD_type;
 
 		mutable int TD_size; //размер текстуры
-		mutable bool TD_to_delete = false;
+
+		mutable std::string TD_clusters_OL; //cluster где юзается (ObjectLibrary, где юзается)
+		mutable std::string TD_clusters_EF;
+		mutable bool TD_exist_in_GR;
+		mutable bool TD_exist_in_OL;
+		mutable bool TD_exist_in_EF;
+		mutable bool TD_exist_on_meta;
+		mutable bool TD_EF_exist_on_meta;
+
+		mutable bool TD_is_aura;
+		mutable bool TD_problem;
+		mutable bool TD_to_delete;
+
+		mutable std::multiset <GameFieldRes*> TD_GRs; //TODO ???? почему сет? для текстуры только 1 запись в Gamefield_Resources.xml - не обязательно
+		mutable std::set <ParticleEffect*> TD_effects;
 
 		bool operator <(const TextureData& other)
 		{
-			if (this->TD_s_texture_name < other.TD_s_texture_name)
+			if (this->TD_texture_name < other.TD_texture_name)
 			{
 				return true;
 			}
@@ -514,7 +557,7 @@ namespace MyTool {
 		}
 		bool operator <(const TextureData& other) const
 		{
-			if (this->TD_s_texture_name < other.TD_s_texture_name)
+			if (this->TD_texture_name < other.TD_texture_name)
 			{
 				return true;
 			}
@@ -524,7 +567,20 @@ namespace MyTool {
 		{
 			if
 				(
-					this->TD_s_texture_name == other.TD_s_texture_name
+					this->TD_texture_name == other.TD_texture_name		&&
+					this->TD_path == other.TD_path		&&
+					this->TD_clusters_OL == other.TD_clusters_OL			&&
+					this->TD_clusters_EF == other.TD_clusters_EF			&&
+					this->TD_GRs == other.TD_GRs							&&
+					this->TD_exist_in_GR == other.TD_exist_in_GR			&&
+					this->TD_exist_in_OL == other.TD_exist_in_OL			&&
+					this->TD_exist_in_EF == other.TD_exist_in_EF			&&
+					this->TD_effects == other.TD_effects					&&
+					this->TD_exist_on_meta == other.TD_exist_on_meta			&&
+					this->TD_EF_exist_on_meta == other.TD_EF_exist_on_meta		&&
+					this->TD_problem == other.TD_problem					&&
+					this->TD_size == other.TD_size							&&
+					this->TD_to_delete == other.TD_to_delete
 					)
 			{
 				return true;
@@ -535,7 +591,20 @@ namespace MyTool {
 		{
 			if
 				(
-					this->TD_s_texture_name == other.TD_s_texture_name
+					this->TD_texture_name == other.TD_texture_name		&&
+					this->TD_path == other.TD_path		&&
+					this->TD_clusters_OL == other.TD_clusters_OL			&&
+					this->TD_clusters_EF == other.TD_clusters_EF			&&
+					this->TD_GRs == other.TD_GRs							&&
+					this->TD_exist_in_GR == other.TD_exist_in_GR			&&
+					this->TD_exist_in_OL == other.TD_exist_in_OL			&&
+					this->TD_exist_in_EF == other.TD_exist_in_EF			&&
+					this->TD_effects == other.TD_effects					&&
+					this->TD_exist_on_meta == other.TD_exist_on_meta			&&
+					this->TD_EF_exist_on_meta == other.TD_EF_exist_on_meta		&&
+					this->TD_problem == other.TD_problem					&&
+					this->TD_size == other.TD_size							&&
+					this->TD_to_delete == other.TD_to_delete
 					)
 			{
 				return true;
@@ -543,37 +612,19 @@ namespace MyTool {
 			else return false;
 		}
 
-		//~TextureData()
-		//{
-		//	LOG_IN_FILE("деструктор для :" << this << '\t' << this->TD_texture_name.string() << std::endl);
-		//	
-		//	//texture
-		//	//gr
-		//	//item
-		//	//layers
-
 	};
 
-
-		//очистить лог_
-
 	void GetTextureFiles();
+	int CountGameFieldRes();
+	int CountObjectLibrary();
+	int CountChapterData();
+	int CountParticleEffect();
+	void GetGameFieldResData();
+	void GetParticleEffectData();
+	void GetObjectLibraryData();
+	void GetChapterData();
 
-	int Count_GameFieldRes();
-
-	int Count_ObjectLibrary();
-
-	int Count_ChapterData();
-
-	int Count_ParticleEffect();
-
-	void Get_GameFieldRes_Info();
-
-	void Get_ObjectLibrary_Info();
-
-	void Get_ChapterData_Info();
-
-	void Get_ParticleEffect_Info();
+	
 
 	void DeleteOrNot();
 
@@ -581,15 +632,17 @@ namespace MyTool {
 
 	void Get_dead_effects();
 
-	void DeleteFromGamefieldResources(TextureData& td);
+	void DeleteFromGamefieldResources(GameFieldRes* gr);
 
-	void DeleteFromObjectLibrary(TextureData& td);
+	void DeleteFromObjectLibrary(ObjLibItem* td);
 
 	void DeleteNoLayersItem();
 
-	TexturePtr FindTexture(boost::filesystem::path texture_path);
-
-	ParticleEffectPtr FindEffect(boost::filesystem::path effect_path);
+	TextureData* FindTexture(const fs::path& texture_path, std::set<TextureData*>& container);
+	ParticleEffect* FindEffectByPath(fs::path effect_path, std::multiset<ParticleEffect*>& container);
+	ParticleEffect* FindParticleEffectByName(std::string& name, std::multiset<ParticleEffect*>& container);
+	GameFieldRes* FindGameFieldResById(std::string id, std::multiset<GameFieldRes*>& container);
+	ObjLibItem* FindObjLibItemById(std::string id);
 
 	void RemoveProblems();
 
@@ -599,7 +652,7 @@ namespace MyTool {
 
 	std::string GetAttr_CH(std::string text_to_parsing, std::string attribute);
 
-	void OL_Clusters_in_one_string();
+	void OL_Clusters_in_one_string(std::set<TextureData*>&container);
 
 	std::set<std::string> Compare2Folder(const std::string path1, const std::string path2);
 
@@ -620,6 +673,16 @@ namespace MyTool {
 	void RemoveEmptyFolders();
 
 	void FillRepairsAndSteps();
+	void DeleteLayer(ObjLibLayer * layer);
+	void DeleteItem(ObjLibItem* item);
+	void DeleteGamefieldRes(GameFieldRes* gr);
+	void DeleteTexture(TextureData* td);
+	ObjLibItem* FindObjLibItemById(std::string id);
+	std::pair<int, int> CountTextureFiles();
+	std::string& GetLayerNameBeforePoint(std::string& fullname);
+	std::string GetParentFolderName(const std::string& path);
+	std::wstring s2ws(const std::string& str);
+	void DeleteLayerFromObjectLibrary(ObjLibLayer* layer);
 }
 
 

@@ -624,8 +624,8 @@ private: System::Void Fill_DataTable_GR()
 			row[0] = count;
 			row[1] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_id); //id
 			row[2] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_path_attr); //filename
-			row[3] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_texture_group_atlas); //atlas
-			row[4] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_path); //path
+			row[3] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_group); //atlas
+			row[4] = MRSHL_stdstr_TO_Str(gr->gameFieldRes_s_full_path); //path
 			DataTable_GR->Rows->Add(row);
 		}
 
@@ -656,18 +656,18 @@ private: System::Void Fill_DataTable_OL()
 	
 	for (auto& gr : texture->TD_GRs)
 	{
-		for (auto& item : gr->gameFieldRes_unique_items)
+		for (auto& layer : gr->gameFieldRes_ObjLibLayers)
 		{	
 			DataRow^ row = DataTable_OL->NewRow();
 			count++;
 			row[0] = count;
-			row[1] = MRSHL_stdstr_TO_Str(item->objItem_item_id); //item_id
-			row[2] = MRSHL_stdstr_TO_Str(item->objItem_instanceClass); //instanceClass
-			row[3] = MRSHL_stdstr_TO_Str(item->objItem_isIndoor); //isIndoor
-			row[4] = MRSHL_stdstr_TO_Str(item->objItem_noRedesignDeformation); //noRedesignDeformation
-			row[5] = MRSHL_stdstr_TO_Str(item->objItem_defaultZOrder); //defaultZOrder
-			row[6] = MRSHL_stdstr_TO_Str(item->objItem_cluster); //cluster
-			row[7] = item->objItem_layers.size(); //layers
+			row[1] = MRSHL_stdstr_TO_Str(layer->objLayer_item->objItem_item_id); //item_id
+			row[2] = MRSHL_stdstr_TO_Str(layer->objLayer_item->objItem_instanceClass); //instanceClass
+			row[3] = MRSHL_stdstr_TO_Str(layer->objLayer_item->objItem_isIndoor); //isIndoor
+			row[4] = MRSHL_stdstr_TO_Str(layer->objLayer_item->objItem_noRedesignDeformation); //noRedesignDeformation
+			row[5] = MRSHL_stdstr_TO_Str(layer->objLayer_item->objItem_defaultZOrder); //defaultZOrder
+			row[6] = MRSHL_stdstr_TO_Str(layer->objLayer_item->objItem_cluster); //cluster
+			row[7] = layer->objLayer_item->objItem_layers.size(); //layers
 
 			DataTable_OL->Rows->Add(row);
 		}
@@ -700,9 +700,9 @@ private: System::Void Fill_DataTable_CH()
 	
 	for (auto& gr : texture->TD_GRs)
 	{
-		for (auto& item : gr->gameFieldRes_unique_items)
+		for (auto& layer : gr->gameFieldRes_ObjLibLayers)
 		{	
-			for (auto& ch : item->objItem_ChapterDatas)
+			for (auto& ch : layer->objLayer_item->objItem_ChapterDatas)
 			{
 				DataRow^ row = DataTable_CH->NewRow();
 				count++;
@@ -710,8 +710,8 @@ private: System::Void Fill_DataTable_CH()
 				row[1] = MRSHL_stdstr_TO_Str(ch->chData_storyInfo_chapter_id); //chapter_id
 				row[2] = MRSHL_stdstr_TO_Str(ch->chData_storyInfo_repair); //repair
 				row[3] = MRSHL_stdstr_TO_Str(ch->chData_storyInfo_step); //step
-				row[4] = MRSHL_stdstr_TO_Str(ch->chData_id); //hash_id
-				row[5] = MRSHL_stdstr_TO_Str(ch->chData_text_dataid); //dataid
+				row[4] = MRSHL_stdstr_TO_Str(ch->chData_hashid); //hash_id
+				row[5] = MRSHL_stdstr_TO_Str(ch->chData_dataid); //dataid
 				row[6] = MRSHL_stdstr_TO_Str(ch->chData_text_zOrder); //zOrder
 
 				DataTable_CH->Rows->Add(row);
@@ -748,9 +748,9 @@ private: System::Void Fill_DataTable_EF()
 		DataRow^ row = DataTable_EF->NewRow();
 				count++;
 				row[0] = count;
-				row[1] = MRSHL_stdstr_TO_Str(eff->partEff_name_p.filename().string()); //filename
-				row[2] = MRSHL_stdstr_TO_Str(eff->partEff_name_p.parent_path().string()); //path
-				row[3] = MRSHL_stdstr_TO_Str(eff->partEff_exist_in_CH); //exist_in_CH
+				row[1] = MRSHL_stdstr_TO_Str(eff->partEff_name); //filename
+				row[2] = MRSHL_stdstr_TO_Str(eff->partEff_string_path); //path
+				row[3] = MRSHL_stdstr_TO_Str(eff->partEff_exist_on_meta?"+":"-"); //exist_in_CH
 				row[4] = MRSHL_stdstr_TO_Str(eff->partEff_dead); //dead
 				row[5] = eff->partEff_ParticleEffectLayers.size(); //layers
 
@@ -795,7 +795,7 @@ private: System::Void EditDataGrid_EF()
 
 private: System::Void Details_Load(System::Object^  sender, System::EventArgs^  e)
 {	
-	pictureBox1->Image = GetImageForData(MRSHL_stdstr_TO_Str(texture->TD_texture_name.string()));
+	pictureBox1->Image = GetImageForData(MRSHL_stdstr_TO_Str(texture->TD_texture_name));
 
 
 	if (!texture->TD_GRs.empty())
@@ -811,13 +811,13 @@ private: System::Void Details_Load(System::Object^  sender, System::EventArgs^  
 		bool has_chapters = false;
 		for (auto& gr : texture->TD_GRs)
 		{
-			if (!gr->gameFieldRes_unique_items.empty())
+			if (!gr->gameFieldRes_ObjLibLayers.empty())
 			{
 				has_items = true;
 
-				for (auto& item : gr->gameFieldRes_unique_items)
+				for (auto& layer : gr->gameFieldRes_ObjLibLayers)
 				{
-					if (!item->objItem_ChapterDatas.empty())
+					if (!layer->objLayer_item->objItem_ChapterDatas.empty())
 					{
 						has_chapters = true;
 					}
@@ -860,9 +860,9 @@ private: System::Void Details_Load(System::Object^  sender, System::EventArgs^  
 	advancedDataGridView_CH->ClearSelection();
 	advancedDataGridView_EF->ClearSelection();
 	
-	label_texture_name->Text = MRSHL_stdstr_TO_Str(texture->TD_texture_name.filename().string());
-	label_texture_path->Text = MRSHL_stdstr_TO_Str(texture->TD_texture_name.string());
-	label_resolution->Text = GetImageResolution(MRSHL_stdstr_TO_Str(texture->TD_texture_name.string()));
+	label_texture_name->Text = MRSHL_stdstr_TO_Str(texture->TD_path.filename().string());
+	label_texture_path->Text = MRSHL_stdstr_TO_Str(texture->TD_texture_name);
+	label_resolution->Text = GetImageResolution(MRSHL_stdstr_TO_Str(texture->TD_texture_name));
 	std::stringstream is;
 	is << texture->TD_size;
 	std::string s_size;
@@ -881,7 +881,7 @@ private: System::Void advancedDataGridView_EF_CellContentDoubleClick(System::Obj
 
 private: System::Void pictureBox1_DoubleClick(System::Object^  sender, System::EventArgs^  e) 
 {	
-	String^ fileName = MRSHL_stdstr_TO_Str(texture->TD_s_texture_name);
+	String^ fileName = MRSHL_stdstr_TO_Str(texture->TD_texture_name);
 	Process^ photoviewer = gcnew Process();
 	photoviewer->Start(fileName);
 	//FileStream^ fs = gcnew FileStream(fileName, FileMode::Open, FileAccess::Read);

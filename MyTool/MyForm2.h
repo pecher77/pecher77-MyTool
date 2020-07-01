@@ -434,15 +434,8 @@ private: System::Void CreateDataTable()
 	column->Unique = false;
 	this->TexturesDataTable->Columns->Add(column);
 
-	//9 Cluster
-	column = gcnew DataColumn();
-	column->DataType = System::Type::GetType("System.String");
-	column->ColumnName = "in_cluster";
-	column->ReadOnly = true;
-	column->Unique = false;
-	this->TexturesDataTable->Columns->Add(column);
 
-	//10 Exist_in_OL
+	//9 Exist_in_OL
 	column = gcnew DataColumn();
 	column->DataType = System::Type::GetType("System.Int32");
 	column->ColumnName = "in_OL";
@@ -450,23 +443,21 @@ private: System::Void CreateDataTable()
 	column->Unique = false;
 	this->TexturesDataTable->Columns->Add(column);
 
-	//11 Exist_in_CH
+	//10 Exist_in_CH
 	column = gcnew DataColumn();
 	column->DataType = System::Type::GetType("System.Int32");
-	column->ColumnName = "in_CH";
+	column->ColumnName = "ON_META";
 	column->ReadOnly = true;
 	column->Unique = false;
 	this->TexturesDataTable->Columns->Add(column);
 
-	//12 Cluster Ef
+	//11 Exist_in_Ef
 	column = gcnew DataColumn();
 	column->DataType = System::Type::GetType("System.Int32");
 	column->ColumnName = "in_EF";
 	column->ReadOnly = true;
 	column->Unique = false;
 	this->TexturesDataTable->Columns->Add(column);
-	
-
 }
 
 		 //заполнить datatable данными
@@ -481,18 +472,18 @@ private: System::Void FillDataTable()
 
 		int count = 0;
 		int chapter_size = 0;
-		for (auto& it : textures)
+		for (auto& it : static_textures)
 		{	
 			count++;
 			DataRow^ row = TexturesDataTable->NewRow();
 
 			row[0] = count;
 			row[1] = it->TD_to_delete;
-			row[2] = GetImageForData(MRSHL_stdstr_TO_Str(it->TD_texture_name.string())); //картинка
-			row[3] = MRSHL_stdstr_TO_Str(it->TD_texture_name.filename().string()); //имя
-			row[4] = MRSHL_stdstr_TO_Str(it->TD_texture_name.parent_path().string());//путь
+			row[2] = GetImageForData(MRSHL_stdstr_TO_Str(it->TD_texture_name)); //картинка
+			row[3] = MRSHL_stdstr_TO_Str(it->TD_path.filename().string()); //имя
+			row[4] = MRSHL_stdstr_TO_Str(it->TD_path.parent_path().string());//путь
 
-			String^ res = MRSHL_stdstr_TO_Str(it->TD_texture_name.string());
+			String^ res = MRSHL_stdstr_TO_Str(it->TD_texture_name);
 			row[5] = GetImageResolution(res);	//разрешение
 
 			std::string atlases;
@@ -500,20 +491,20 @@ private: System::Void FillDataTable()
 			if(it->TD_GRs.size() == 1)
 			{	
 				auto& iter = it->TD_GRs.begin();
-				atlases = (*iter)->gameFieldRes_texture_group_atlas;
+				atlases = (*iter)->gameFieldRes_group;
 				row[6] = MRSHL_stdstr_TO_Str(atlases); //атлас
 			}
 			else if (it->TD_GRs.size() > 1)
 			{	
 				auto& iter = it->TD_GRs.begin();
-				atlases = (*iter)->gameFieldRes_texture_group_atlas;
+				atlases = (*iter)->gameFieldRes_group;
 
 				std::advance(iter, 1);
 
 				while (iter != it->TD_GRs.end())
 				{
 					atlases += ", ";
-					atlases += (*iter)->gameFieldRes_texture_group_atlas;
+					atlases += (*iter)->gameFieldRes_group;
 					std::advance(iter, 1);
 				}
 
@@ -527,43 +518,121 @@ private: System::Void FillDataTable()
 
 			row[8] = it->TD_GRs.size(); //в скольки объектах GR текстура
 
-			row[9] = MRSHL_stdstr_TO_Str(it->TD_clusters_OL);
 
 			//кол-во items
 			if (!it->TD_GRs.empty())
 			{	
-				int count_items = 0;
+				std::set<ObjLibItem*> layers;
+				int count = 0;
 				for (auto& gr : it->TD_GRs)
-				{
-					count_items += gr->gameFieldRes_unique_items.size();
+				{	
+					for (auto& layer : gr->gameFieldRes_ObjLibLayers)
+						layers.emplace(layer->objLayer_item);
 				}
-				row[10] = count_items; 
+				row[9] = layers.size();
 			}
-			else row[10] = 0;
+			else row[9] = 0;
 
-			//кол-во датаайди
+			//кол-во объектов на мете
 			if (!it->TD_GRs.empty())
 			{	
 				chapter_size = 0;
 				for (auto& gr : it->TD_GRs)
 				{
-					for (auto& item : gr->gameFieldRes_unique_items)
+					for (auto& layer : gr->gameFieldRes_ObjLibLayers)
 					{
-						chapter_size += item->objItem_ChapterDatas.size();
+						chapter_size += layer->objLayer_item->objItem_ChapterDatas.size();
 					}
 				}
-				row[11] = chapter_size;
+				row[10] = chapter_size;
 			}
-			else row[11] = 0;
+			else row[10] = 0;
 
-			row[12] = it->TD_effects.size();
-			//row[13] = MRSHL_stdstr_TO_Str(it.TD_EF_exist_in_CH);
+			row[11] = it->TD_effects.size();
 			
 			TexturesDataTable->Rows->Add(row);
-
 		}
 		
+		for (auto& it : aura_textures)
+		{
+			count++;
+			DataRow^ row = TexturesDataTable->NewRow();
 
+			row[0] = count;
+			row[1] = it->TD_to_delete;
+			row[2] = GetImageForData(MRSHL_stdstr_TO_Str(it->TD_texture_name)); //картинка
+			row[3] = MRSHL_stdstr_TO_Str(it->TD_path.filename().string()); //имя
+			row[4] = MRSHL_stdstr_TO_Str(it->TD_path.parent_path().string());//путь
+
+			String^ res = MRSHL_stdstr_TO_Str(it->TD_texture_name);
+			row[5] = GetImageResolution(res);	//разрешение
+
+			std::string atlases;
+
+			if (it->TD_GRs.size() == 1)
+			{
+				auto& iter = it->TD_GRs.begin();
+				atlases = (*iter)->gameFieldRes_group;
+				row[6] = MRSHL_stdstr_TO_Str(atlases); //атлас
+			}
+			else if (it->TD_GRs.size() > 1)
+			{
+				auto& iter = it->TD_GRs.begin();
+				atlases = (*iter)->gameFieldRes_group;
+
+				std::advance(iter, 1);
+
+				while (iter != it->TD_GRs.end())
+				{
+					atlases += ", ";
+					atlases += (*iter)->gameFieldRes_group;
+					std::advance(iter, 1);
+				}
+
+				row[6] = MRSHL_stdstr_TO_Str(atlases); //атлас
+			}
+			else if (it->TD_GRs.size() == 0)
+				row[6] = "";
+
+			row[7] = it->TD_size;
+
+
+			row[8] = it->TD_GRs.size(); //в скольки объектах GR текстура
+
+
+			//кол-во items
+			if (!it->TD_GRs.empty())
+			{
+				std::set<ObjLibItem*> items;
+				int count = 0;
+				for (auto& gr : it->TD_GRs)
+				{
+					for (auto& layer : gr->gameFieldRes_ObjLibLayers)
+						items.emplace(layer->objLayer_item);
+				}
+				row[9] = items.size();
+			}
+			else row[9] = 0;
+
+			//кол-во датаайди
+			if (!it->TD_GRs.empty())
+			{
+				chapter_size = 0;
+				for (auto& gr : it->TD_GRs)
+				{
+					for (auto& layer : gr->gameFieldRes_ObjLibLayers)
+					{
+						chapter_size += layer->objLayer_item->objItem_ChapterDatas.size();
+					}
+				}
+				row[10] = chapter_size;
+			}
+			else row[10] = 0;
+
+			row[11] = it->TD_effects.size();
+
+			TexturesDataTable->Rows->Add(row);
+		}
 		
 
 		loading_form->Close();
@@ -598,11 +667,10 @@ private: System::Void EditDataGrid()
 	advancedDataGridView2->Columns[5]->Width = 100; //разрешение
 	advancedDataGridView2->Columns[6]->Width = 100; //атлас
 	advancedDataGridView2->Columns[7]->Width = 50; //размер 
-	advancedDataGridView2->Columns[8]->Width = 50; //exist GR
-	advancedDataGridView2->Columns[9]->Width = 50; //cluster
-	advancedDataGridView2->Columns[10]->Width = 50; //exist OL
-	advancedDataGridView2->Columns[11]->Width = 50; //exist CH
-	advancedDataGridView2->Columns[12]->Width = 50; //кол-во эффектов
+	advancedDataGridView2->Columns[8]->Width = 60; //exist GR
+	advancedDataGridView2->Columns[9]->Width = 60; //exist OL
+	advancedDataGridView2->Columns[10]->Width = 80; //exist CH
+	advancedDataGridView2->Columns[11]->Width = 60; //кол-во эффектов
 	advancedDataGridView2->DisableFilterAndSort(advancedDataGridView2->Columns[2]);
 	advancedDataGridView2->ClearSelection();
 
@@ -616,7 +684,6 @@ private: System::Void EditDataGrid()
 	label_Total_size->Text = "Total size: " + sum.ToString() + " bytes = " + mb.ToString() + " Mbytes";
 
 	label_total_textures->Text = Convert::ToString(this->SBind->List->Count);
-	
 }
 
 		 //раскрасить датагрид
@@ -688,6 +755,8 @@ private: System::Void DeleteFromDataTable(String^ texture_path)
 
 }
 
+
+
 #pragma endregion creatingDatagrid 
 
 private: System::Void MyForm2_Load(System::Object^  sender, System::EventArgs^  e) 
@@ -715,24 +784,30 @@ public: event Del_DisableDataGrid^ ev_DisableDataGrid;
 /////////////////////////////УДАЛЕНИЕ ТЕКСТУР
 private: System::Void DeleteSelectedTextures(DoWorkEventArgs^  e)
 {
-	//deleting_count = 0;
 	button1_cancel_del->Show();
 	progressBar1->Value = 0;
 	progressBar1->Show();
 	label1_progress->Text = "Loading...";
 	label1_progress->Show();
 
+	texture_deleted = 0;
+	texture_deleted_size = 0;
+	resources_texture_deleted = 0;
+	resources_texture_deleted_size = 0;
+	OL_items_deleted = 0;
+
+	unsigned int start_time = clock();
+
+
 	error_counter = 0;
 
-	LOG_IN_FILE(std::endl << std::endl << "DELETING textures and records");
-	//LOG_IN_FILE("Num"<<'\t'<<"deleting_From" << '\t' << "RESULT_del_file" << '\t' << "Texture_name" << '\t' << "path" << '\t' <<  "ID_GR" << '\t' << "ID_OL_item" << '\t' << "instanceClass");
-	LOG_IN_FILE("Num" << '\t' << "deleting_RESULT" << '\t' << "deleting_from" << '\t' << "deleting_what" << '\t' << "deleting_what(name)");
+	LOG_IN_FILE(std::endl << std::endl << "DELETING textures and records in xml files");
 	problem_textures_path.clear();
 
 	DateTime starttime = DateTime::Now;
 
 	int count_chapter_dataid = 0;
-	boost::system::error_code ec;
+	
 
 	for (int i = advancedDataGridView2->Rows->Count - 1; i >= 0; i--)
 	{	
@@ -753,97 +828,14 @@ private: System::Void DeleteSelectedTextures(DoWorkEventArgs^  e)
 			fs::path path_texture = s_path;
 
 			//найти удаляемую текстуру по пути
-			TexturePtr td = FindTexture(path_texture); //TODO +pointer но в стеке
-			int ref_count = td.use_count(); 
-			assert(td != nullptr);
+			TextureData* td = FindTexture(path_texture, static_textures);
+			if (!td)
+				td = FindTexture(path_texture, aura_textures);
 
-			//проверка есть ли на мете, если да, - то в лог и дальше
-			count_chapter_dataid = 0;
-			if (!td->TD_GRs.empty())
-			{
-				for (auto& gr : td->TD_GRs)
-				{
-					if (!gr->gameFieldRes_unique_items.empty())
-					{
-						for (auto& item : gr->gameFieldRes_unique_items)
-							count_chapter_dataid += item->objItem_ChapterDatas.size();
-					}
-				}
+			assert(td);
 
-				if (count_chapter_dataid != 0)
-				{
-					std::string data;
-					error_counter++;
+			DeleteTexture(td);
 
-					for (auto& gr : td->TD_GRs)
-					{
-						for (auto& item : gr->gameFieldRes_unique_items)
-						{
-							for (auto& chapter_dataid : item->objItem_ChapterDatas)
-							{
-								data = chapter_dataid->chData_storyInfo_chapter_id + " - " + chapter_dataid->chData_storyInfo_repair + " - " + chapter_dataid->chData_storyInfo_step + " - " + chapter_dataid->chData_id + " - " + chapter_dataid->chData_text_dataid;
-								LOG_IN_FILE(deleting_count << '\t' << "canceled - exists on meta: " << data << '\t' << "-" << '\t' << "texture and records" << '\t' << td->TD_texture_name.string());
-							}
-
-						}
-					}
-					continue;
-				}
-			}
-			//проверка есть ли в эффектах, если да, - то в лог и дальше
-			if (td->TD_effects.size() != 0)
-			{
-				std::string data;
-				error_counter++;
-
-				for (auto& effect : td->TD_effects)
-				{
-					LOG_IN_FILE(deleting_count << '\t' << "canceled - exists in effect: " << effect->partEff_name_p.string() << '\t' << "-" << '\t' << "texture and records" << '\t' << td->TD_texture_name.string());
-				}
-				continue;
-			}
-
-			//если не удаляется текстура - дальше из контейнера не удаляем
-			fs::remove(td->TD_texture_name, ec);
-			LOG_IN_FILE(deleting_count << '\t' << ec.message() << '\t' << "folder" << '\t' << "texture_file" << '\t' << td->TD_texture_name.string());
-			if (ec != 0)
-			{
-				error_counter++;
-				td->TD_problem = true;
-				problem_textures_path.push_back(td->TD_texture_name);
-				continue;
-			}
-
-			//если есть GR
-			if (!td->TD_GRs.empty())
-			{	
-				for (auto& gr : td->TD_GRs)
-				{	
-					//если есть items в OL
-					if (!gr->gameFieldRes_unique_items.empty()) //не пустые лееры
-					{	
-						DeleteFromObjectLibrary(*td);  //удалить items с леерами из xml 
-						for (auto& item : gr->gameFieldRes_unique_items)
-						{	
-							for (auto& layer : item->objItem_layers)
-							{
-								ObjLib_layers.erase(layer); //удалить леер из контейнера
-							}
-							ObjLib_items.erase(item); //удалить item из контейнера 
-						}
-					}
-					DeleteFromGamefieldResources(*td);
-					GameField_objects.erase(gr); //удалить gr из контейнера
-				}
-			}
-			//удаляем текстуру из контейнера
-			textures.erase(td);
-			assert(td.use_count() != 0);
-			//textures.erase(it); //удаление из контейнера TextureData - в деструкторе удаляется все остальное
-
-			//удаляем из advancedDataGridView2 через Invoke
-			//Invoke(gcnew Del_DeleteRow(this, &MyForm2::DeleteRow), row);
-				
 			//обновить прогресс бар
 			TimeSpan timespent = DateTime::Now - starttime;
 			int secondsremaining = timespent.TotalSeconds / progressBar1->Value * (progressBar1->Maximum - progressBar1->Value);
@@ -853,7 +845,12 @@ private: System::Void DeleteSelectedTextures(DoWorkEventArgs^  e)
 		}
 	}
 
+	label1_progress->Text = "Deleting empty items...";
+	label1_progress->Update();
 
+	DeleteNoLayersItem();
+
+	
 }
 
 private: System::Void button_delete_selected_Click(System::Object^  sender, System::EventArgs^  e) 
@@ -908,6 +905,10 @@ private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  send
 
 	RemoveEmptyFolders();
 
+	LOG_IN_FILE("Deleted textures" << '\t' << texture_deleted << '\t' << "total size" << '\t' << texture_deleted_size);
+	LOG_IN_FILE("Deleted resource textures" << '\t' << resources_texture_deleted << '\t' << "total size" << '\t' << resources_texture_deleted_size);
+	LOG_IN_FILE("Deleted ObjectLibrary items" << '\t' << OL_items_deleted);
+
 	//CreateDataTable();
 	FillDataTable();
 	BindDataTableToBinding();
@@ -931,13 +932,30 @@ private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  send
 	}
 	
 	if (error_counter > 0)
-	{
+	{	
+		Int32 texture_deleted_int32 = texture_deleted;
+		Int32 texture_deleted_size_int32 = texture_deleted_size;
+		Int32 resources_texture_deleted_int32 = resources_texture_deleted;
+		Int32 resources_texture_deleted_size_int32 = resources_texture_deleted_size;
+		Int32 OL_items_deleted_int32 = OL_items_deleted;
+
 		MessageBox::Show("Some textures (" + error_counter + ") have not been removed. Check Log_file :" + MRSHL_stdstr_TO_Str(path_LOG), "Result");
+		MessageBox::Show("Deleted textures:" + texture_deleted_int32.ToString() + " , total cleaned size: " + texture_deleted_size_int32.ToString() + " b , Deleted resource textures: " + resources_texture_deleted_int32.ToString() + ", total cleaned resources size: " + resources_texture_deleted_size_int32.ToString() + " b ,  Deleted ObjectLibrary items:  " + OL_items_deleted_int32.ToString());
+
 		return;
 	}
 	if (error_counter == 0)
 	{
 		MessageBox::Show("All selected textures have been successfully removed", "Result");
+
+		Int32 texture_deleted_int32 = texture_deleted;
+		Int32 texture_deleted_size_int32 = texture_deleted_size;
+		Int32 resources_texture_deleted_int32 = resources_texture_deleted;
+		Int32 resources_texture_deleted_size_int32 = resources_texture_deleted_size;
+		Int32 OL_items_deleted_int32 = OL_items_deleted;
+
+		MessageBox::Show("Deleted textures:" + texture_deleted_int32.ToString() + " , total cleaned size: "+ texture_deleted_size_int32.ToString()+", Deleted resource textures: "+resources_texture_deleted_int32.ToString()+", total cleaned resources size: "+ resources_texture_deleted_size_int32.ToString()+",  Deleted ObjectLibrary items:  "+ OL_items_deleted_int32.ToString());
+		
 		return;
 	}
 }
@@ -1039,12 +1057,15 @@ private: System::Void advancedDataGridView2_CellDoubleClick(System::Object^  sen
 	String^ texture_path = advancedDataGridView2->CurrentRow->Cells[4]->Value->ToString() + "/" + advancedDataGridView2->CurrentRow->Cells[3]->Value->ToString();
 	std::string s_path = MRSHL_Str_TO_stdstr(texture_path);
 	fs::path p_path = s_path;
-	TexturePtr d = FindTexture(p_path);
+
+	TextureData* d = FindTexture(p_path, static_textures);
+	if (!d)
+		d = FindTexture(p_path, aura_textures);
 	
 
 	if (clicked_column_index == 3) //имя
 	{
-		String^ fileName = MRSHL_stdstr_TO_Str(d->TD_s_texture_name);
+		String^ fileName = MRSHL_stdstr_TO_Str(d->TD_texture_name);
 		Process^ photoviewer = gcnew Process();
 		photoviewer->Start(fileName);
 	}
@@ -1052,13 +1073,13 @@ private: System::Void advancedDataGridView2_CellDoubleClick(System::Object^  sen
 	{
 		Process^ explorer = gcnew Process();
 		//String^ filepath = MRSHL_stdstr_TO_Str(d->TD_s_texture_name);
-		String^ filepath = MRSHL_stdstr_TO_Str(d->TD_texture_name.parent_path().string());
+		String^ filepath = MRSHL_stdstr_TO_Str(d->TD_path.parent_path().string());
 		explorer->Start(filepath);
 
 	}
 	else
 	{
-		Details^ detail_form = gcnew Details(d.get());
+		Details^ detail_form = gcnew Details(d);
 		detail_form->Show();
 	}
 }

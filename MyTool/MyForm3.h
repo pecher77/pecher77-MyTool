@@ -20,7 +20,7 @@ namespace MyTool {
 	{
 	public:
 		static DateTime starttime;
-		String^ type;
+		String^ type; //текстуры либо партикл эффекты
 
 			Boolean check = false;
 	private: System::ComponentModel::BackgroundWorker^  backgroundWorker1;
@@ -28,7 +28,7 @@ namespace MyTool {
 
 
 	public:
-		static Int32 maxvalue;
+		static Int32 resources_value;
 
 		MyForm3(void)
 		{
@@ -169,93 +169,6 @@ namespace MyTool {
 
 #pragma endregion
 
-	private: System::Void Collect_info()
-	{
-		if (!textures.empty())
-		{
-			JustShowTextureTable();
-			return;
-		}
-
-		//получить сет текстур 
-		unsigned int start_time = clock();
-
-		label2->Text = "Collecting all textures...";
-		label2->Update();
-		GetTextureFiles();
-		LOG_IN_FILE(std::endl << std::endl << "duration GetTextureFiles:" << '\t' << clock() - start_time);
-
-		if (backgroundWorker1->CancellationPending)
-
-			return;
-
-		MyTool::MyForm3::maxvalue = 0;
-
-		label2->Text = "Estimating datasize...";
-		label2->Update();
-		MyTool::MyForm3::maxvalue += Count_GameFieldRes();
-		if (backgroundWorker1->CancellationPending)
-			return;
-		MyTool::MyForm3::maxvalue += Count_ObjectLibrary();
-		if (backgroundWorker1->CancellationPending)
-			return;
-		MyTool::MyForm3::maxvalue += Count_ChapterData();
-		if (backgroundWorker1->CancellationPending)
-			return;
-		MyTool::MyForm3::maxvalue += Count_ParticleEffect();
-		if (backgroundWorker1->CancellationPending)
-			return;
-
-		MyTool::MyForm3::starttime = DateTime::Now;
-
-		MyTool::MyForm3::label1->Show();
-		MyTool::MyForm3::label3->Show();
-		MyTool::MyForm3::progressBar1->Maximum = maxvalue;
-		MyTool::MyForm3::progressBar1->Show();
-
-		start_time = clock();
-		//получить из Gamefield_Resources
-		Get_GameFieldRes_Info();
-
-		if (backgroundWorker1->CancellationPending)
-			return;
-
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_GR_Info:" << '\t' << clock() - start_time);
-
-		start_time = clock();
-
-		////получить из ObjectLibrary имя леера, имя объекта
-		Get_ObjectLibrary_Info();
-		if (backgroundWorker1->CancellationPending)
-			return;
-
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_OL_Info:" << '\t' << clock() - start_time);
-
-		start_time = clock();
-
-
-		Get_ChapterData_Info();
-		if (backgroundWorker1->CancellationPending)
-			return;
-		//EndProgress();
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_CH_Info:" << '\t' << clock() - start_time << std::endl);
-
-		///////////////////получить партикл(не swl) эффекты
-		start_time = clock();
-
-		Get_ParticleEffect_Info();
-		if (backgroundWorker1->CancellationPending)
-			return;
-		//EndProgress();
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_EF_Info:" << '\t' << clock() - start_time);
-		/////////////////////////
-		OL_Clusters_in_one_string();
-		if (backgroundWorker1->CancellationPending)
-			return;
-		DeleteOrNot();
-
-
-	}
 
 	private: System::Void MyForm3_Shown(System::Object^  sender, System::EventArgs^  e)
 	{
@@ -281,11 +194,8 @@ namespace MyTool {
 
 		if (backgroundWorker1->IsBusy != true)
 		{
-			// Start the asynchronous operation.
 			backgroundWorker1->RunWorkerAsync();
 		}
-
-
 	}
 
 	public: System::Void JustShowTextureTable()
@@ -312,20 +222,19 @@ namespace MyTool {
 	public: static System::Void UpdateProgress(int curr_value, std::string label2, std::string label3)
 	{
 
-
 		float max = 0.00f;
 		float val = 0.00f;
 		float percent = 0.00f;
 		//label1 - время и %, label2 - что грузим
-		max = MyTool::MyForm3::maxvalue;
+		max = MyTool::MyForm3::resources_value;
 		val = curr_value / max;
 		percent = roundf(val * 100) / 100 * 100;
 
 		TimeSpan timespent = DateTime::Now - starttime;
-		int secondsremaining = timespent.TotalSeconds / curr_value * (maxvalue - curr_value);
+		int secondsremaining = timespent.TotalSeconds / curr_value * (resources_value - curr_value);
 
 		//loading estimating
-		MyTool::MyForm3::label1->Text = curr_value + "/ " + maxvalue + "       " + percent + " %     Time remaining: " + secondsremaining + " seconds";
+		MyTool::MyForm3::label1->Text = curr_value + "/ " + resources_value + "       " + percent + " %     Time remaining: " + secondsremaining + " seconds";
 		MyTool::MyForm3::label1->Update();
 
 
@@ -356,118 +265,177 @@ namespace MyTool {
 
 	private: System::Void backgroundWorker1_DoWork_1(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e)
 	{
-		if (!textures.empty())
+		if (collected)
 		{
 			JustShowTextureTable();
 			return;
 		}
 
-		//получить сет текстур 
-		unsigned int start_time = clock();
+		cancelExecution = false;
 
-		label2->Text = "Collecting all textures...";
-		label2->Update();
-		GetTextureFiles();
-		LOG_IN_FILE(std::endl << std::endl << "duration GetTextureFiles:" << '\t' << clock() - start_time);
-
-		if (backgroundWorker1->CancellationPending)
-		{
-			e->Cancel = true;
-			return;
-		}
-
-		MyTool::MyForm3::maxvalue = 0;
+		unsigned int start_time;
+		unsigned int start_time_full = clock();
+		MyTool::MyForm3::resources_value = 0;
 
 		label2->Text = "Estimating datasize...";
 		label2->Update();
-		MyTool::MyForm3::maxvalue += Count_GameFieldRes();
+
+		start_time = clock();
+		//посчитатать текстуры
+		auto pair = MyTool::CountTextureFiles();
+
 		if (backgroundWorker1->CancellationPending)
 		{
-			e->Cancel = true;
-			return;
-		}
-		MyTool::MyForm3::maxvalue += Count_ObjectLibrary();
-		if (backgroundWorker1->CancellationPending)
-		{
-			e->Cancel = true;
-			return;
-		}
-		MyTool::MyForm3::maxvalue += Count_ChapterData();
-		if (backgroundWorker1->CancellationPending)
-		{
-			e->Cancel = true;
-			return;
-		}
-		MyTool::MyForm3::maxvalue += Count_ParticleEffect();
-		if (backgroundWorker1->CancellationPending)
-		{
-			e->Cancel = true;
+			cancelExecution = true;
 			return;
 		}
 
-		MyTool::MyForm3::starttime = DateTime::Now;
+		int static_textures_count = pair.first;
+		int aura_textures_count = pair.second;
+
+		LOG_IN_FILE("textures :" << static_textures_count + aura_textures_count);
+		LOG_IN_FILE("static textures :" << static_textures_count << std::endl << "aura textures :" << aura_textures_count);
+
+		resources_value = static_textures_count + aura_textures_count;
+
+		start_time = clock();
+		//посчитатать Gamefield_res
+		int count_GameFieldRes = CountGameFieldRes();
+		LOG_IN_FILE("GamefieldResouirces :" << count_GameFieldRes);
+		resources_value += count_GameFieldRes;
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
+			return;
+		}
+
+		//посчитатать ParticleEffects
+		int count_ParticleEffect = CountParticleEffect();
+		LOG_IN_FILE("ParticleEffects :" << count_ParticleEffect);
+		resources_value += count_ParticleEffect;
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
+			return;
+		}
+
+		//посчитатать ObjectLibrary
+		int count_ObjectLibraryItems = CountObjectLibrary();
+		LOG_IN_FILE("ObjectLibraryItems :" << count_ObjectLibraryItems);
+		resources_value += count_ObjectLibraryItems;
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
+			return;
+		}
+
+		//посчитатать ChapterData
+		int count_ChapterData = CountChapterData();
+		LOG_IN_FILE("ChaprerObjects :" << count_ChapterData);
+		resources_value += count_ChapterData;
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
+			return;
+		}
+		//LOG_IN_FILE("all data:" << resources_value);
+		LOG_IN_FILE("dduration counting data:" << '\t' << clock() - start_time);
+		
 
 		MyTool::MyForm3::label1->Show();
 		MyTool::MyForm3::label3->Show();
-		MyTool::MyForm3::progressBar1->Maximum = maxvalue;
+		MyTool::MyForm3::progressBar1->Maximum = resources_value;
 		MyTool::MyForm3::progressBar1->Show();
 
-		start_time = clock();
-		//получить из Gamefield_Resources
-		Get_GameFieldRes_Info();
 
+		label2->Text = "Collecting textures...";
+		label2->Update();
+
+		MyTool::MyForm3::starttime = DateTime::Now;
+
+		///////////получить все текстуры
+		start_time = clock();
+		GetTextureFiles();
+		//LOG_IN_FILE(std::endl << std::endl << "duration GetTextureFiles:" << '\t' << clock() - start_time);
 		if (backgroundWorker1->CancellationPending)
 		{
-			e->Cancel = true;
+			cancelExecution = true;
 			return;
 		}
-
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_GR_Info:" << '\t' << clock() - start_time);
-
+		///////////////////////////////////////////
+		LOG_IN_FILE(std::endl);
+		///////////получить Gamefield_Resources
 		start_time = clock();
-
-		////получить из ObjectLibrary имя леера, имя объекта
-		Get_ObjectLibrary_Info();
+		GetGameFieldResData();
 		if (backgroundWorker1->CancellationPending)
 		{
-			e->Cancel = true;
+			cancelExecution = true;
 			return;
 		}
-
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_OL_Info:" << '\t' << clock() - start_time);
-
+		//LOG_IN_FILE(std::endl << std::endl << "duration Get_GR_Info:" << '\t' << clock() - start_time);
+		/////////////////////////////////
+		LOG_IN_FILE(std::endl);
+		///////////////////получить партикл эффекты
 		start_time = clock();
-
-
-		Get_ChapterData_Info();
+		GetParticleEffectData();
 		if (backgroundWorker1->CancellationPending)
 		{
-			e->Cancel = true;
+			cancelExecution = true;
 			return;
 		}
-		//EndProgress();
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_CH_Info:" << '\t' << clock() - start_time << std::endl);
-
-		///////////////////получить партикл(не swl) эффекты
-		start_time = clock();
-
-		Get_ParticleEffect_Info();
-		if (backgroundWorker1->CancellationPending)
-		{
-			e->Cancel = true;
-			return;
-		}
-		//EndProgress();
-		LOG_IN_FILE(std::endl << std::endl << "duration Get_EF_Info:" << '\t' << clock() - start_time);
+		//LOG_IN_FILE(std::endl << std::endl << "duration Get_EF_Info:" << '\t' << clock() - start_time);
 		/////////////////////////
-		OL_Clusters_in_one_string();
+		LOG_IN_FILE(std::endl);
+		////получить ObjectLibrary
+		start_time = clock();
+		GetObjectLibraryData();
 		if (backgroundWorker1->CancellationPending)
 		{
-			e->Cancel = true;
+			cancelExecution = true;
+			return;
+		}
+		//LOG_IN_FILE(std::endl << std::endl << "duration Get_OL_Info:" << '\t' << clock() - start_time);
+		/////////////////////////
+		LOG_IN_FILE(std::endl);
+		////получить Chapter-objects
+		start_time = clock();
+		GetChapterData();
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
+			return;
+		}
+		//LOG_IN_FILE(std::endl << std::endl << "duration Get_CH_Info:" << '\t' << clock() - start_time << std::endl);
+		/////////////////////////
+		LOG_IN_FILE(std::endl);
+		////?разобраться
+		OL_Clusters_in_one_string(static_textures);
+		OL_Clusters_in_one_string(aura_textures);
+
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
 			return;
 		}
 		DeleteOrNot();
+
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
+			return;
+		}
+
 		Get_dead_effects();
+
+
+		collected = true;
+
+		if (backgroundWorker1->CancellationPending)
+		{
+			cancelExecution = true;
+			return;
+		}
+		LOG_IN_FILE(std::endl << std::endl << "duration ALL:" << '\t' << clock() - start_time_full << std::endl);
 	}
 
 	public: event EventHandler^ ClosingForm3;
@@ -475,33 +443,40 @@ namespace MyTool {
 
 	private: System::Void backgroundWorker1_RunWorkerCompleted_1(System::Object^  sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e)
 	{
-		//backgroundWorker1->CancelAsync();
 		if (!e->Cancelled)
-			if (type=="texture_table")
-				JustShowTextureTable();
-			else if (type == "effect_table")
+			if (collected)
 			{
-				JustShowEffectTable();
+				if (type == "texture_table")
+					JustShowTextureTable();
+				else if (type == "effect_table")
+				{
+					JustShowEffectTable();
+				}
 			}
 		else
-		{
-			if (!textures.empty())
-				textures.clear();
+			{
 
-			if (!GameField_objects.empty())
-				GameField_objects.clear();
+				static_textures.clear();
+				aura_textures.clear();
 
-			if (!ObjLib_layers.empty())
-				ObjLib_layers.clear();
+				GameField_static_textures.clear();
+				GameField_aura_textures.clear();
 
-			if (!ObjLib_items.empty())
+				particle_effects_XML.clear();
+
 				ObjLib_items.clear();
 
-			if (!CH_objects.empty())
+				ObjLib_layer_textures.clear();
+				ObjLib_layer_xml_effects.clear();
+				ObjLib_layer_swl_effects.clear();
+				ObjLib_layer_light_effects.clear();
+				ObjLib_layer_light_aura.clear();
+				ObjLib_layer_lights.clear();
+
 				CH_objects.clear();
 
-			if (!particle_effects.empty())
-				particle_effects.clear();
+
+			collected = false;
 
 			//cancelExecution = false;
 			ClosingForm3(this,nullptr);

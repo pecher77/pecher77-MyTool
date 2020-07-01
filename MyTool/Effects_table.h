@@ -260,18 +260,18 @@ namespace MyTool {
 		EF_CreateDataTable();
 
 	int count = 0;
-	for (auto& effect : particle_effects)
+	for (auto& effect : particle_effects_XML)
 	{
 		count++;
 		DataRow^ row = EffectsDataTable->NewRow();
 
 		row[0] = count;
 		row[1] = effect->partEff_to_delete;
-		row[2] = MRSHL_stdstr_TO_Str(effect->partEff_name_p.filename().string()); //имя
-		row[3] = MRSHL_stdstr_TO_Str(effect->partEff_name_p.parent_path().string()); //путь
+		row[2] = MRSHL_stdstr_TO_Str(effect->partEff_name); //имя
+		row[3] = MRSHL_stdstr_TO_Str(effect->partEff_string_path); //путь
 		row[4] = effect->partEff_ParticleEffectLayers.size(); //текстур в эффекте
 		row[5] = MRSHL_stdstr_TO_Str(effect->partEff_dead);	//мертвый ли эфеект
-		row[6] = MRSHL_stdstr_TO_Str(effect->partEff_exist_in_CH); //есть ли на мете
+		row[6] = MRSHL_stdstr_TO_Str(effect->partEff_exist_on_meta? "+" : "-"); //есть ли на мете
 
 		EffectsDataTable->Rows->Add(row);
 
@@ -584,7 +584,7 @@ namespace MyTool {
 	private: System::Void button_refresh_table_Click(System::Object^  sender, System::EventArgs^  e) 
 	{	
 
-		particle_effects.clear();
+		particle_effects_XML.clear();
 		CH_objects.clear();
 		texture_particle_effect.clear();
 
@@ -594,14 +594,14 @@ namespace MyTool {
 		load1->Update();
 		load1->Show();
 		load1->label1->Update();
-		Get_ChapterData_Info();
+		GetChapterData();
 	
 
 		load1->label1->Text = "Collecting particle effects...";
 		load1->label1->Update();
 		load1->Update();
 
-		Get_ParticleEffect_Info();
+		GetParticleEffectData();
 
 		load1->label1->Text = "detection DEAD effects...";
 		load1->label1->Update();

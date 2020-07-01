@@ -206,9 +206,9 @@ namespace MyTool {
 		std::string str_path = MRSHL_Str_TO_stdstr(s);
 		fs::path eff = str_path;
 
-		ParticleEffectPtr effect = FindEffect(eff); //TODO copy smartpointer
+		ParticleEffect* effect = FindEffectByPath(eff, particle_effects_XML);
 
-		label_effect_name->Text = MRSHL_stdstr_TO_Str(effect->partEff_name_s);
+		label_effect_name->Text = MRSHL_stdstr_TO_Str(effect->partEff_name);
 
 		
 
@@ -219,13 +219,13 @@ namespace MyTool {
 			DataRow^ row = EffectDataTable->NewRow();
 
 			row[0] = count;
-			if (eff_layer->effectLayer_file_exist == "-")
+			if (eff_layer->effectLayer_file_exist)
 				row[1] = GetImageForData("nofile.png");
 			else
-				row[1] = GetImageForData(MRSHL_stdstr_TO_Str(eff_layer->effectLayer_effectTexture_path_s)); //картинка
-			row[2] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_effectTexture_path_p.filename().string()); //имя
+				row[1] = GetImageForData(MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path)); //картинка
+			row[2] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path); //имя
 
-			row[3] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_effectTexture_path_p.parent_path().string()); //путь
+			row[3] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path); //путь
 
 			EffectDataTable->Rows->Add(row);
 

@@ -259,13 +259,12 @@ namespace MyTool
 			// 
 			// label_Project
 			// 
-			this->label_Project->AutoSize = true;
 			this->label_Project->BackColor = System::Drawing::SystemColors::Info;
 			this->label_Project->Dock = System::Windows::Forms::DockStyle::Right;
-			this->label_Project->Location = System::Drawing::Point(83, 0);
+			this->label_Project->Location = System::Drawing::Point(72, 0);
 			this->label_Project->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_Project->Name = L"label_Project";
-			this->label_Project->Size = System::Drawing::Size(74, 29);
+			this->label_Project->Size = System::Drawing::Size(85, 29);
 			this->label_Project->TabIndex = 2;
 			this->label_Project->Text = L"Project Library";
 			this->toolTip1->SetToolTip(this->label_Project, L"Choose project path to construct all pathes");
@@ -273,12 +272,12 @@ namespace MyTool
 			// label_GamefieldPath
 			// 
 			this->label_GamefieldPath->Dock = System::Windows::Forms::DockStyle::Right;
-			this->label_GamefieldPath->Location = System::Drawing::Point(4, 29);
+			this->label_GamefieldPath->Location = System::Drawing::Point(72, 29);
 			this->label_GamefieldPath->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_GamefieldPath->Name = L"label_GamefieldPath";
-			this->label_GamefieldPath->Size = System::Drawing::Size(153, 29);
+			this->label_GamefieldPath->Size = System::Drawing::Size(85, 29);
 			this->label_GamefieldPath->TabIndex = 2;
-			this->label_GamefieldPath->Text = L"base_mm/Gamefield_Resources.xml";
+			this->label_GamefieldPath->Text = L"Resources.xml";
 			// 
 			// label_repairsFolder
 			// 
@@ -356,6 +355,7 @@ namespace MyTool
 			this->richTextBox_showdata->Size = System::Drawing::Size(562, 391);
 			this->richTextBox_showdata->TabIndex = 7;
 			this->richTextBox_showdata->Text = L"Choose file to show data";
+			this->richTextBox_showdata->TextChanged += gcnew System::EventHandler(this, &MyForm::richTextBox_showdata_TextChanged);
 			// 
 			// button_search
 			// 
@@ -480,7 +480,6 @@ namespace MyTool
 			// 
 			// label_Textures_folder
 			// 
-			this->label_Textures_folder->AutoSize = true;
 			this->label_Textures_folder->Dock = System::Windows::Forms::DockStyle::Right;
 			this->label_Textures_folder->Location = System::Drawing::Point(6, 58);
 			this->label_Textures_folder->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
@@ -515,12 +514,11 @@ namespace MyTool
 			// 
 			// label2
 			// 
-			this->label2->AutoSize = true;
 			this->label2->Dock = System::Windows::Forms::DockStyle::Right;
-			this->label2->Location = System::Drawing::Point(70, 298);
+			this->label2->Location = System::Drawing::Point(76, 298);
 			this->label2->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(87, 48);
+			this->label2->Size = System::Drawing::Size(81, 48);
 			this->label2->TabIndex = 2;
 			this->label2->Text = L"ObjectLibrary.xml";
 			// 
@@ -1160,7 +1158,7 @@ private: System::Boolean CheckFileInFolder(String^ path, String^ filename)
 ///////////////////////////пути
 private: System::Void MakeGamefieldResPath()
 {
-	textBox_GamefieldPath->Text = textbox_ProjectPath->Text + "/base_mm/Gamefield_Resources.xml";
+	textBox_GamefieldPath->Text = textbox_ProjectPath->Text + "/base_mm/cluster1/Resources.xml";
 	std::string file = MRSHL_Str_TO_stdstr(textBox_GamefieldPath->Text);
 
 	if (ExistFile(file))
@@ -1315,7 +1313,7 @@ private: System::Void textBox_GamefieldPath_DoubleClick(System::Object^  sender,
 	std::string file = MRSHL_Str_TO_stdstr(textBox_GamefieldPath->Text);
 
 
-	if (file.find("Gamefield_Resources.xml") != -1)
+	if (file.find("Resources.xml") != -1)
 	{
 		path_gamefield_resources = file;
 		textBox_GamefieldPath->BackColor = Color::Honeydew;
@@ -1323,7 +1321,7 @@ private: System::Void textBox_GamefieldPath_DoubleClick(System::Object^  sender,
 	else
 	{
 		textBox_GamefieldPath->BackColor = Color::MistyRose;
-		MessageBox::Show("Not Gamefield_Resources.xml file");
+		MessageBox::Show("Not Resources file");
 	}
 }
 
@@ -1398,7 +1396,7 @@ private: System::Void textBox_GamefieldPath_Leave(System::Object^  sender, Syste
 {	
 	std::string g_path = MRSHL_Str_TO_stdstr(textBox_GamefieldPath->Text);
 
-	if (ExistFile(g_path) && g_path.find("Gamefield_Resources.xml")!=-1)
+	if (ExistFile(g_path) && g_path.find("Resources.xml")!=-1)
 	{	
 		path_gamefield_resources = g_path;
 		textBox_GamefieldPath->BackColor = Color::Honeydew;
@@ -1781,7 +1779,7 @@ private: System::Void button_define_unused_textures_Click(System::Object^  sende
 
 	if (textBox_GamefieldPath->BackColor == Color::MistyRose)
 	{	
-		MessageBox::Show("Wrong Gamefield_Resources.xml path");
+		MessageBox::Show("Wrong Resources.xml path");
 		return;
 	}
 	if (CH_files.empty())
@@ -1805,8 +1803,8 @@ private: System::Void button_define_unused_textures_Click(System::Object^  sende
 
 	path_base_mm = MRSHL_Str_TO_stdstr(textbox_ProjectPath->Text + "/base_mm");
 
-	//this->Hide();
-	if (textures.empty())
+
+	if (!collected)
 	{
 		form3_loading = gcnew MyForm3("texture_table");
 
@@ -1842,7 +1840,7 @@ private: System::Void Refresh_Particle_Table()
 //таблица партикл эффектов
 private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) 
 {
-	if (!textures.empty())
+	if (collected)
 	{	
 		this->Hide();
 		form3_loading->JustShowEffectTable();
@@ -1869,37 +1867,37 @@ private: System::Void button_chapter_editor_Click(System::Object^  sender, Syste
 	}
 	else
 	{*/	
-		loading^ load = gcnew loading;
-		load->Show();
-		if (!textures.empty())
-			textures.clear();
-		load->label1->Text = "Collecting textures...";
-		load->label1->Update();
-		GetTextureFiles();
+	//	loading^ load = gcnew loading;
+	//	load->Show();
+	//	if (!static_textures.empty() && )
+	//		textures.clear();
+	//	load->label1->Text = "Collecting textures...";
+	//	load->label1->Update();
+	//	GetTextureFiles();
 
-		if (GameField_objects.empty())
-			GameField_objects.clear();
-		load->label1->Text = "Collecting GamefieldResources...";
-		load->label1->Update();
-		Get_GameFieldRes_Info();
+	//	if (GameField_objects.empty())
+	//		GameField_objects.clear();
+	//	load->label1->Text = "Collecting GamefieldResources...";
+	//	load->label1->Update();
+	//	Get_GameFieldRes_Info();
 
-		if (ObjLib_items.empty())
-			ObjLib_items.clear();
-		load->label1->Text = "Collecting ObjectLibrary resources...";
-		load->label1->Update();
-		Get_ObjectLibrary_Info();
+	//	if (ObjLib_items.empty())
+	//		ObjLib_items.clear();
+	//	load->label1->Text = "Collecting ObjectLibrary resources...";
+	//	load->label1->Update();
+	//	Get_ObjectLibrary_Info();
 
-		if (CH_objects.empty())
-			CH_objects.clear();
-		load->label1->Text = "Collecting Chapters resources...";
-		load->label1->Update();
-		Get_ChapterData_Info();
+	//	if (CH_objects.empty())
+	//		CH_objects.clear();
+	//	load->label1->Text = "Collecting Chapters resources...";
+	//	load->label1->Update();
+	//	Get_ChapterData_Info();
 
-		load->Close();
+	//	load->Close();
 
-		chapter_editor^ chap = gcnew chapter_editor;
-		chap->Show();
-	/*}*/
+	//	chapter_editor^ chap = gcnew chapter_editor;
+	//	chap->Show();
+	///*}*/
 
 }
 	
@@ -2389,16 +2387,7 @@ private: System::Void CutStepsCombobox(String^ repair)
 
 #pragma endregion tab2
 
+private: System::Void richTextBox_showdata_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+}
 };
 }
-
-
-
-
-
-
-
-
-
-
-
