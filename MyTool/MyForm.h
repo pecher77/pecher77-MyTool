@@ -115,9 +115,10 @@ namespace MyTool
 	private: System::Windows::Forms::TableLayoutPanel^  tableLayoutPanel10;
 	private: System::Windows::Forms::Label^  label_repair;
 	private: System::Windows::Forms::Label^  label3;
-
-
-
+	private: System::Windows::Forms::Button^  Do;
+	private: System::Windows::Forms::CheckBox^  checkBox1;
+private: System::Windows::Forms::TableLayoutPanel^  tableLayoutPanel12;
+private: System::Windows::Forms::CheckBox^  checkBox_resetISOBOX;
 
 	public:
 		int selected_end = 0;
@@ -224,12 +225,12 @@ namespace MyTool
 			this->listBox_CH = (gcnew System::Windows::Forms::ListBox());
 			this->tableLayoutPanel7 = (gcnew System::Windows::Forms::TableLayoutPanel());
 			this->button_tab2_choose_ch = (gcnew System::Windows::Forms::Button());
-			this->button_change_attribute = (gcnew System::Windows::Forms::Button());
 			this->tableLayoutPanel8 = (gcnew System::Windows::Forms::TableLayoutPanel());
 			this->comboBox_attribute = (gcnew System::Windows::Forms::ComboBox());
 			this->comboBox_znak = (gcnew System::Windows::Forms::ComboBox());
 			this->textBox_value = (gcnew System::Windows::Forms::TextBox());
 			this->tableLayoutPanel11 = (gcnew System::Windows::Forms::TableLayoutPanel());
+			this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBox_all = (gcnew System::Windows::Forms::CheckBox());
 			this->checkbox_hash_id = (gcnew System::Windows::Forms::CheckBox());
 			this->tableLayoutPanel9 = (gcnew System::Windows::Forms::TableLayoutPanel());
@@ -239,6 +240,10 @@ namespace MyTool
 			this->comboBox_step = (gcnew System::Windows::Forms::ComboBox());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->textBox_ids = (gcnew System::Windows::Forms::TextBox());
+			this->tableLayoutPanel12 = (gcnew System::Windows::Forms::TableLayoutPanel());
+			this->button_change_attribute = (gcnew System::Windows::Forms::Button());
+			this->Do = (gcnew System::Windows::Forms::Button());
+			this->checkBox_resetISOBOX = (gcnew System::Windows::Forms::CheckBox());
 			this->textBox_search = (gcnew System::Windows::Forms::TextBox());
 			this->tableLayoutPanel5 = (gcnew System::Windows::Forms::TableLayoutPanel());
 			this->Tabs->SuspendLayout();
@@ -254,6 +259,7 @@ namespace MyTool
 			this->tableLayoutPanel11->SuspendLayout();
 			this->tableLayoutPanel9->SuspendLayout();
 			this->tableLayoutPanel10->SuspendLayout();
+			this->tableLayoutPanel12->SuspendLayout();
 			this->tableLayoutPanel5->SuspendLayout();
 			this->SuspendLayout();
 			// 
@@ -346,8 +352,8 @@ namespace MyTool
 			// 
 			// richTextBox_showdata
 			// 
+			this->richTextBox_showdata->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->tableLayoutPanel5->SetColumnSpan(this->richTextBox_showdata, 4);
-			this->richTextBox_showdata->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->richTextBox_showdata->Location = System::Drawing::Point(4, 34);
 			this->richTextBox_showdata->Margin = System::Windows::Forms::Padding(4);
 			this->richTextBox_showdata->Name = L"richTextBox_showdata";
@@ -565,10 +571,10 @@ namespace MyTool
 			this->button_tab2_clear_ch->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->button_tab2_clear_ch->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 6.25F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(204)));
-			this->button_tab2_clear_ch->Location = System::Drawing::Point(70, 4);
+			this->button_tab2_clear_ch->Location = System::Drawing::Point(142, 4);
 			this->button_tab2_clear_ch->Margin = System::Windows::Forms::Padding(4);
 			this->button_tab2_clear_ch->Name = L"button_tab2_clear_ch";
-			this->button_tab2_clear_ch->Size = System::Drawing::Size(97, 19);
+			this->button_tab2_clear_ch->Size = System::Drawing::Size(97, 26);
 			this->button_tab2_clear_ch->TabIndex = 13;
 			this->button_tab2_clear_ch->Text = L"clear";
 			this->toolTip1->SetToolTip(this->button_tab2_clear_ch, L"remove all");
@@ -578,10 +584,10 @@ namespace MyTool
 			// button_tab2_minus_ch
 			// 
 			this->button_tab2_minus_ch->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->button_tab2_minus_ch->Location = System::Drawing::Point(37, 4);
+			this->button_tab2_minus_ch->Location = System::Drawing::Point(73, 4);
 			this->button_tab2_minus_ch->Margin = System::Windows::Forms::Padding(4);
 			this->button_tab2_minus_ch->Name = L"button_tab2_minus_ch";
-			this->button_tab2_minus_ch->Size = System::Drawing::Size(25, 19);
+			this->button_tab2_minus_ch->Size = System::Drawing::Size(61, 26);
 			this->button_tab2_minus_ch->TabIndex = 12;
 			this->button_tab2_minus_ch->Text = L"-";
 			this->toolTip1->SetToolTip(this->button_tab2_minus_ch, L"remove chapter file");
@@ -594,7 +600,7 @@ namespace MyTool
 			this->button_tab2_plus_ch->Location = System::Drawing::Point(4, 4);
 			this->button_tab2_plus_ch->Margin = System::Windows::Forms::Padding(4);
 			this->button_tab2_plus_ch->Name = L"button_tab2_plus_ch";
-			this->button_tab2_plus_ch->Size = System::Drawing::Size(25, 19);
+			this->button_tab2_plus_ch->Size = System::Drawing::Size(61, 26);
 			this->button_tab2_plus_ch->TabIndex = 10;
 			this->button_tab2_plus_ch->Text = L"+";
 			this->toolTip1->SetToolTip(this->button_tab2_plus_ch, L"add chapter file");
@@ -627,10 +633,10 @@ namespace MyTool
 			// 
 			this->Tabs->Controls->Add(this->tabPage2);
 			this->Tabs->Controls->Add(this->tabPage1);
-			this->Tabs->Location = System::Drawing::Point(9, 4);
+			this->Tabs->Location = System::Drawing::Point(9, 30);
 			this->Tabs->Name = L"Tabs";
 			this->Tabs->SelectedIndex = 0;
-			this->Tabs->Size = System::Drawing::Size(986, 451);
+			this->Tabs->Size = System::Drawing::Size(1103, 592);
 			this->Tabs->TabIndex = 15;
 			this->Tabs->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::Tabs_SelectedIndexChanged);
 			// 
@@ -640,7 +646,7 @@ namespace MyTool
 			this->tabPage2->Location = System::Drawing::Point(4, 22);
 			this->tabPage2->Name = L"tabPage2";
 			this->tabPage2->Padding = System::Windows::Forms::Padding(3);
-			this->tabPage2->Size = System::Drawing::Size(978, 425);
+			this->tabPage2->Size = System::Drawing::Size(1095, 566);
 			this->tabPage2->TabIndex = 1;
 			this->tabPage2->Text = L"Pathes";
 			this->tabPage2->UseVisualStyleBackColor = true;
@@ -762,7 +768,7 @@ namespace MyTool
 			this->tabPage1->Location = System::Drawing::Point(4, 22);
 			this->tabPage1->Name = L"tabPage1";
 			this->tabPage1->Padding = System::Windows::Forms::Padding(3);
-			this->tabPage1->Size = System::Drawing::Size(978, 425);
+			this->tabPage1->Size = System::Drawing::Size(1095, 566);
 			this->tabPage1->TabIndex = 2;
 			this->tabPage1->Text = L"Change value of CH attribute ";
 			this->tabPage1->UseVisualStyleBackColor = true;
@@ -771,29 +777,35 @@ namespace MyTool
 			// 
 			this->tableLayoutPanel6->ColumnCount = 2;
 			this->tableLayoutPanel6->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
-				45.84139F)));
+				48.16248F)));
 			this->tableLayoutPanel6->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
-				54.15861F)));
+				51.83752F)));
 			this->tableLayoutPanel6->Controls->Add(this->listBox_CH, 0, 0);
 			this->tableLayoutPanel6->Controls->Add(this->tableLayoutPanel7, 0, 6);
-			this->tableLayoutPanel6->Controls->Add(this->button_change_attribute, 1, 6);
 			this->tableLayoutPanel6->Controls->Add(this->tableLayoutPanel8, 1, 0);
 			this->tableLayoutPanel6->Controls->Add(this->tableLayoutPanel11, 1, 1);
 			this->tableLayoutPanel6->Controls->Add(this->tableLayoutPanel9, 1, 2);
 			this->tableLayoutPanel6->Controls->Add(this->tableLayoutPanel10, 1, 3);
 			this->tableLayoutPanel6->Controls->Add(this->textBox_ids, 1, 4);
+			this->tableLayoutPanel6->Controls->Add(this->tableLayoutPanel12, 3, 6);
 			this->tableLayoutPanel6->Location = System::Drawing::Point(6, 6);
 			this->tableLayoutPanel6->Name = L"tableLayoutPanel6";
 			this->tableLayoutPanel6->RowCount = 7;
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 58.49057F)));
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 41.50943F)));
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 36)));
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 38)));
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 117)));
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 100)));
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 64)));
-			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 57)));
-			this->tableLayoutPanel6->Size = System::Drawing::Size(517, 423);
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 48.59813F)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 51.40187F)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 44)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 44)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 214)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 77)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 76)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 63)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 25)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 20)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 20)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 20)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 20)));
+			this->tableLayoutPanel6->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Absolute, 20)));
+			this->tableLayoutPanel6->Size = System::Drawing::Size(517, 554);
 			this->tableLayoutPanel6->TabIndex = 12;
 			// 
 			// listBox_CH
@@ -803,12 +815,15 @@ namespace MyTool
 			this->listBox_CH->Location = System::Drawing::Point(3, 3);
 			this->listBox_CH->Name = L"listBox_CH";
 			this->tableLayoutPanel6->SetRowSpan(this->listBox_CH, 6);
-			this->listBox_CH->Size = System::Drawing::Size(230, 352);
+			this->listBox_CH->Size = System::Drawing::Size(243, 471);
 			this->listBox_CH->TabIndex = 1;
 			this->listBox_CH->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::listBox_CH_SelectedIndexChanged);
 			// 
 			// tableLayoutPanel7
 			// 
+			this->tableLayoutPanel7->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->tableLayoutPanel7->ColumnCount = 3;
 			this->tableLayoutPanel7->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
 				50)));
@@ -820,56 +835,47 @@ namespace MyTool
 			this->tableLayoutPanel7->Controls->Add(this->button_tab2_clear_ch, 2, 0);
 			this->tableLayoutPanel7->Controls->Add(this->button_tab2_plus_ch, 0, 0);
 			this->tableLayoutPanel7->Controls->Add(this->button_tab2_minus_ch, 1, 0);
-			this->tableLayoutPanel7->Location = System::Drawing::Point(3, 361);
+			this->tableLayoutPanel7->Location = System::Drawing::Point(3, 480);
 			this->tableLayoutPanel7->Name = L"tableLayoutPanel7";
 			this->tableLayoutPanel7->RowCount = 2;
 			this->tableLayoutPanel7->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 48.27586F)));
 			this->tableLayoutPanel7->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 51.72414F)));
-			this->tableLayoutPanel7->Size = System::Drawing::Size(171, 58);
+			this->tableLayoutPanel7->Size = System::Drawing::Size(243, 71);
 			this->tableLayoutPanel7->TabIndex = 15;
 			// 
 			// button_tab2_choose_ch
 			// 
 			this->tableLayoutPanel7->SetColumnSpan(this->button_tab2_choose_ch, 3);
 			this->button_tab2_choose_ch->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->button_tab2_choose_ch->Location = System::Drawing::Point(4, 31);
+			this->button_tab2_choose_ch->Location = System::Drawing::Point(4, 38);
 			this->button_tab2_choose_ch->Margin = System::Windows::Forms::Padding(4);
 			this->button_tab2_choose_ch->Name = L"button_tab2_choose_ch";
-			this->button_tab2_choose_ch->Size = System::Drawing::Size(163, 23);
+			this->button_tab2_choose_ch->Size = System::Drawing::Size(235, 29);
 			this->button_tab2_choose_ch->TabIndex = 14;
 			this->button_tab2_choose_ch->Text = L"Choose Chapter xml files (multiple select)";
 			this->button_tab2_choose_ch->UseVisualStyleBackColor = true;
 			this->button_tab2_choose_ch->Click += gcnew System::EventHandler(this, &MyForm::button_tab2_choose_ch_Click);
 			// 
-			// button_change_attribute
-			// 
-			this->button_change_attribute->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->button_change_attribute->Location = System::Drawing::Point(239, 361);
-			this->button_change_attribute->Name = L"button_change_attribute";
-			this->button_change_attribute->Size = System::Drawing::Size(275, 59);
-			this->button_change_attribute->TabIndex = 13;
-			this->button_change_attribute->Text = L"Change attribute";
-			this->button_change_attribute->UseVisualStyleBackColor = true;
-			this->button_change_attribute->Click += gcnew System::EventHandler(this, &MyForm::button_change_attribute_Click);
-			// 
 			// tableLayoutPanel8
 			// 
+			this->tableLayoutPanel8->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->tableLayoutPanel8->ColumnCount = 3;
 			this->tableLayoutPanel8->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
 				50)));
 			this->tableLayoutPanel8->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
 				50)));
 			this->tableLayoutPanel8->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Absolute,
-				75)));
+				76)));
 			this->tableLayoutPanel8->Controls->Add(this->comboBox_attribute, 0, 0);
 			this->tableLayoutPanel8->Controls->Add(this->comboBox_znak, 1, 0);
 			this->tableLayoutPanel8->Controls->Add(this->textBox_value, 2, 0);
-			this->tableLayoutPanel8->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->tableLayoutPanel8->Location = System::Drawing::Point(239, 3);
+			this->tableLayoutPanel8->Location = System::Drawing::Point(252, 3);
 			this->tableLayoutPanel8->Name = L"tableLayoutPanel8";
 			this->tableLayoutPanel8->RowCount = 1;
 			this->tableLayoutPanel8->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 50)));
-			this->tableLayoutPanel8->Size = System::Drawing::Size(275, 33);
+			this->tableLayoutPanel8->Size = System::Drawing::Size(262, 42);
 			this->tableLayoutPanel8->TabIndex = 18;
 			// 
 			// comboBox_attribute
@@ -882,7 +888,7 @@ namespace MyTool
 			});
 			this->comboBox_attribute->Location = System::Drawing::Point(3, 3);
 			this->comboBox_attribute->Name = L"comboBox_attribute";
-			this->comboBox_attribute->Size = System::Drawing::Size(94, 21);
+			this->comboBox_attribute->Size = System::Drawing::Size(87, 21);
 			this->comboBox_attribute->TabIndex = 7;
 			this->comboBox_attribute->Text = L"attribute";
 			this->comboBox_attribute->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::comboBox_attribute_SelectedIndexChanged_1);
@@ -892,16 +898,16 @@ namespace MyTool
 			this->comboBox_znak->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->comboBox_znak->FormattingEnabled = true;
 			this->comboBox_znak->Items->AddRange(gcnew cli::array< System::Object^  >(5) { L"+", L"-", L"*", L"/", L"=" });
-			this->comboBox_znak->Location = System::Drawing::Point(103, 3);
+			this->comboBox_znak->Location = System::Drawing::Point(96, 3);
 			this->comboBox_znak->Name = L"comboBox_znak";
-			this->comboBox_znak->Size = System::Drawing::Size(94, 21);
+			this->comboBox_znak->Size = System::Drawing::Size(87, 21);
 			this->comboBox_znak->TabIndex = 6;
 			this->comboBox_znak->Text = L"operation";
 			this->comboBox_znak->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::comboBox_znak_SelectedIndexChanged_1);
 			// 
 			// textBox_value
 			// 
-			this->textBox_value->Location = System::Drawing::Point(203, 3);
+			this->textBox_value->Location = System::Drawing::Point(189, 3);
 			this->textBox_value->Name = L"textBox_value";
 			this->textBox_value->Size = System::Drawing::Size(63, 20);
 			this->textBox_value->TabIndex = 8;
@@ -911,27 +917,43 @@ namespace MyTool
 			// 
 			// tableLayoutPanel11
 			// 
-			this->tableLayoutPanel11->ColumnCount = 2;
+			this->tableLayoutPanel11->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->tableLayoutPanel11->ColumnCount = 3;
 			this->tableLayoutPanel11->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
 				50)));
 			this->tableLayoutPanel11->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
 				50)));
+			this->tableLayoutPanel11->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Absolute,
+				88)));
+			this->tableLayoutPanel11->Controls->Add(this->checkBox1, 2, 0);
 			this->tableLayoutPanel11->Controls->Add(this->checkBox_all, 0, 0);
 			this->tableLayoutPanel11->Controls->Add(this->checkbox_hash_id, 1, 0);
-			this->tableLayoutPanel11->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->tableLayoutPanel11->Location = System::Drawing::Point(239, 42);
+			this->tableLayoutPanel11->Location = System::Drawing::Point(252, 51);
 			this->tableLayoutPanel11->Name = L"tableLayoutPanel11";
 			this->tableLayoutPanel11->RowCount = 1;
 			this->tableLayoutPanel11->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 50)));
-			this->tableLayoutPanel11->Size = System::Drawing::Size(275, 22);
+			this->tableLayoutPanel11->Size = System::Drawing::Size(262, 44);
 			this->tableLayoutPanel11->TabIndex = 21;
+			// 
+			// checkBox1
+			// 
+			this->checkBox1->AutoSize = true;
+			this->checkBox1->Location = System::Drawing::Point(177, 3);
+			this->checkBox1->Name = L"checkBox1";
+			this->checkBox1->Size = System::Drawing::Size(51, 17);
+			this->checkBox1->TabIndex = 23;
+			this->checkBox1->Text = L"mask";
+			this->checkBox1->UseVisualStyleBackColor = true;
+			this->checkBox1->CheckedChanged += gcnew System::EventHandler(this, &MyForm::checkBox1_CheckedChanged);
 			// 
 			// checkBox_all
 			// 
 			this->checkBox_all->AutoSize = true;
 			this->checkBox_all->Location = System::Drawing::Point(3, 3);
 			this->checkBox_all->Name = L"checkBox_all";
-			this->checkBox_all->Size = System::Drawing::Size(73, 16);
+			this->checkBox_all->Size = System::Drawing::Size(73, 17);
 			this->checkBox_all->TabIndex = 10;
 			this->checkBox_all->Text = L"all objects";
 			this->checkBox_all->UseVisualStyleBackColor = true;
@@ -940,9 +962,9 @@ namespace MyTool
 			// checkbox_hash_id
 			// 
 			this->checkbox_hash_id->AutoSize = true;
-			this->checkbox_hash_id->Location = System::Drawing::Point(140, 3);
+			this->checkbox_hash_id->Location = System::Drawing::Point(90, 3);
 			this->checkbox_hash_id->Name = L"checkbox_hash_id";
-			this->checkbox_hash_id->Size = System::Drawing::Size(63, 16);
+			this->checkbox_hash_id->Size = System::Drawing::Size(63, 17);
 			this->checkbox_hash_id->TabIndex = 11;
 			this->checkbox_hash_id->Text = L"hash_id";
 			this->checkbox_hash_id->UseVisualStyleBackColor = true;
@@ -958,11 +980,11 @@ namespace MyTool
 			this->tableLayoutPanel9->Controls->Add(this->comboBox_repair, 1, 0);
 			this->tableLayoutPanel9->Controls->Add(this->label_repair, 0, 0);
 			this->tableLayoutPanel9->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->tableLayoutPanel9->Location = System::Drawing::Point(239, 70);
+			this->tableLayoutPanel9->Location = System::Drawing::Point(252, 101);
 			this->tableLayoutPanel9->Name = L"tableLayoutPanel9";
 			this->tableLayoutPanel9->RowCount = 1;
 			this->tableLayoutPanel9->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 50)));
-			this->tableLayoutPanel9->Size = System::Drawing::Size(275, 30);
+			this->tableLayoutPanel9->Size = System::Drawing::Size(262, 38);
 			this->tableLayoutPanel9->TabIndex = 19;
 			// 
 			// comboBox_repair
@@ -970,9 +992,9 @@ namespace MyTool
 			this->comboBox_repair->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->comboBox_repair->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBox_repair->FormattingEnabled = true;
-			this->comboBox_repair->Location = System::Drawing::Point(11, 3);
+			this->comboBox_repair->Location = System::Drawing::Point(10, 3);
 			this->comboBox_repair->Name = L"comboBox_repair";
-			this->comboBox_repair->Size = System::Drawing::Size(261, 21);
+			this->comboBox_repair->Size = System::Drawing::Size(249, 21);
 			this->comboBox_repair->TabIndex = 16;
 			this->comboBox_repair->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::comboBox_repair_SelectedIndexChanged);
 			// 
@@ -982,7 +1004,7 @@ namespace MyTool
 			this->label_repair->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->label_repair->Location = System::Drawing::Point(3, 0);
 			this->label_repair->Name = L"label_repair";
-			this->label_repair->Size = System::Drawing::Size(2, 30);
+			this->label_repair->Size = System::Drawing::Size(1, 38);
 			this->label_repair->TabIndex = 17;
 			this->label_repair->Text = L"repair";
 			// 
@@ -996,11 +1018,11 @@ namespace MyTool
 			this->tableLayoutPanel10->Controls->Add(this->comboBox_step, 1, 0);
 			this->tableLayoutPanel10->Controls->Add(this->label3, 0, 0);
 			this->tableLayoutPanel10->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->tableLayoutPanel10->Location = System::Drawing::Point(239, 106);
+			this->tableLayoutPanel10->Location = System::Drawing::Point(252, 145);
 			this->tableLayoutPanel10->Name = L"tableLayoutPanel10";
 			this->tableLayoutPanel10->RowCount = 1;
 			this->tableLayoutPanel10->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 50)));
-			this->tableLayoutPanel10->Size = System::Drawing::Size(275, 32);
+			this->tableLayoutPanel10->Size = System::Drawing::Size(262, 38);
 			this->tableLayoutPanel10->TabIndex = 20;
 			// 
 			// comboBox_step
@@ -1008,9 +1030,9 @@ namespace MyTool
 			this->comboBox_step->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->comboBox_step->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBox_step->FormattingEnabled = true;
-			this->comboBox_step->Location = System::Drawing::Point(11, 3);
+			this->comboBox_step->Location = System::Drawing::Point(10, 3);
 			this->comboBox_step->Name = L"comboBox_step";
-			this->comboBox_step->Size = System::Drawing::Size(261, 21);
+			this->comboBox_step->Size = System::Drawing::Size(249, 21);
 			this->comboBox_step->TabIndex = 17;
 			this->comboBox_step->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::comboBox_step_SelectedIndexChanged);
 			// 
@@ -1020,22 +1042,90 @@ namespace MyTool
 			this->label3->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->label3->Location = System::Drawing::Point(3, 0);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(2, 32);
+			this->label3->Size = System::Drawing::Size(1, 38);
 			this->label3->TabIndex = 17;
 			this->label3->Text = L"step";
 			// 
 			// textBox_ids
 			// 
 			this->textBox_ids->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->textBox_ids->Location = System::Drawing::Point(239, 144);
+			this->textBox_ids->Location = System::Drawing::Point(252, 189);
 			this->textBox_ids->Multiline = true;
 			this->textBox_ids->Name = L"textBox_ids";
 			this->tableLayoutPanel6->SetRowSpan(this->textBox_ids, 2);
-			this->textBox_ids->Size = System::Drawing::Size(275, 211);
+			this->textBox_ids->Size = System::Drawing::Size(262, 285);
 			this->textBox_ids->TabIndex = 9;
 			this->textBox_ids->Text = L"dataids comma separated";
 			this->textBox_ids->Click += gcnew System::EventHandler(this, &MyForm::textBox_ids_Click);
 			this->textBox_ids->Leave += gcnew System::EventHandler(this, &MyForm::textBox_ids_Leave_1);
+			// 
+			// tableLayoutPanel12
+			// 
+			this->tableLayoutPanel12->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->tableLayoutPanel12->ColumnCount = 2;
+			this->tableLayoutPanel12->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
+				50)));
+			this->tableLayoutPanel12->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent,
+				50)));
+			this->tableLayoutPanel12->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Absolute,
+				71)));
+			this->tableLayoutPanel12->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Absolute,
+				29)));
+			this->tableLayoutPanel12->Controls->Add(this->button_change_attribute, 0, 0);
+			this->tableLayoutPanel12->Controls->Add(this->Do, 0, 1);
+			this->tableLayoutPanel12->Controls->Add(this->checkBox_resetISOBOX, 1, 1);
+			this->tableLayoutPanel12->Location = System::Drawing::Point(252, 480);
+			this->tableLayoutPanel12->Name = L"tableLayoutPanel12";
+			this->tableLayoutPanel12->RowCount = 2;
+			this->tableLayoutPanel12->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 50)));
+			this->tableLayoutPanel12->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 50)));
+			this->tableLayoutPanel12->Size = System::Drawing::Size(262, 71);
+			this->tableLayoutPanel12->TabIndex = 23;
+			// 
+			// button_change_attribute
+			// 
+			this->button_change_attribute->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->button_change_attribute->AutoSize = true;
+			this->tableLayoutPanel12->SetColumnSpan(this->button_change_attribute, 2);
+			this->button_change_attribute->Location = System::Drawing::Point(3, 3);
+			this->button_change_attribute->Name = L"button_change_attribute";
+			this->button_change_attribute->Size = System::Drawing::Size(256, 29);
+			this->button_change_attribute->TabIndex = 13;
+			this->button_change_attribute->Text = L"Change attribute";
+			this->button_change_attribute->UseVisualStyleBackColor = true;
+			this->button_change_attribute->Click += gcnew System::EventHandler(this, &MyForm::button_change_attribute_Click);
+			// 
+			// Do
+			// 
+			this->Do->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->Do->AutoSize = true;
+			this->Do->Location = System::Drawing::Point(3, 38);
+			this->Do->Name = L"Do";
+			this->Do->Size = System::Drawing::Size(125, 30);
+			this->Do->TabIndex = 22;
+			this->Do->Text = L"OLOffsetToCH";
+			this->Do->UseVisualStyleBackColor = true;
+			this->Do->Click += gcnew System::EventHandler(this, &MyForm::Do_Click);
+			// 
+			// checkBox_resetISOBOX
+			// 
+			this->checkBox_resetISOBOX->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->checkBox_resetISOBOX->AutoSize = true;
+			this->checkBox_resetISOBOX->Location = System::Drawing::Point(134, 38);
+			this->checkBox_resetISOBOX->Name = L"checkBox_resetISOBOX";
+			this->checkBox_resetISOBOX->Size = System::Drawing::Size(125, 30);
+			this->checkBox_resetISOBOX->TabIndex = 23;
+			this->checkBox_resetISOBOX->Text = L"reset isobox";
+			this->checkBox_resetISOBOX->UseVisualStyleBackColor = true;
+			this->checkBox_resetISOBOX->CheckedChanged += gcnew System::EventHandler(this, &MyForm::checkBox_resetISOBOX_CheckedChanged);
 			// 
 			// textBox_search
 			// 
@@ -1082,7 +1172,7 @@ namespace MyTool
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->AutoSize = true;
-			this->ClientSize = System::Drawing::Size(1124, 467);
+			this->ClientSize = System::Drawing::Size(1124, 634);
 			this->Controls->Add(this->tableLayoutPanel5);
 			this->Controls->Add(this->Tabs);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
@@ -1115,6 +1205,8 @@ namespace MyTool
 			this->tableLayoutPanel9->PerformLayout();
 			this->tableLayoutPanel10->ResumeLayout(false);
 			this->tableLayoutPanel10->PerformLayout();
+			this->tableLayoutPanel12->ResumeLayout(false);
+			this->tableLayoutPanel12->PerformLayout();
 			this->tableLayoutPanel5->ResumeLayout(false);
 			this->tableLayoutPanel5->PerformLayout();
 			this->ResumeLayout(false);
@@ -2388,6 +2480,27 @@ private: System::Void CutStepsCombobox(String^ repair)
 #pragma endregion tab2
 
 private: System::Void richTextBox_showdata_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+}
+
+private: System::Void Do_Click(System::Object^  sender, System::EventArgs^  e) 
+{
+	ChangeOLOffsetToCHOffset();
+	MessageBox::Show("Done");
+}
+
+		 //маска айди
+private: System::Void checkBox1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+	
+	if (checkBox1->CheckState == CheckState::Checked)
+		ch_id_mask = true;
+	else
+		ch_id_mask = false;
+}
+private: System::Void checkBox_resetISOBOX_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+	if (checkBox_resetISOBOX->CheckState == CheckState::Checked)
+		reset_isobox = true;
+	else
+		reset_isobox = false;
 }
 };
 }

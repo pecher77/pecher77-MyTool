@@ -3,9 +3,11 @@
 #include "tinyxml2.h"
 #include "ChangeCHAttrib.h"
 #include "Core.h"
+#include "winsock.h"
 
 namespace MyTool 
-{
+{	
+	
 	//////////////////////скорректировать любой аттрибут в CH_FirstGarden.xml
 	std::vector<std::string>iso_attributes = { "uL" ,"uR" ,"x" ,"y", "z" };
 	std::vector<std::string>attributes = { "dataId" ,"m" ,"rand","x" ,"y","zOrder" };
@@ -390,6 +392,12 @@ namespace MyTool
 	//или ReplaceInCHObjectText - если другой аттрибут
 	std::string CH_ProcessAttributeBy(std::string id, std::string attribute_to_change, std::string value_to_change, char action, std::function<std::string(std::string, std::string, std::string, char)> ReplaceInCh)
 	{	
+		std::string temp_id;
+		if (!ch_id_mask)
+			temp_id = '"' + id + '"';
+		else
+			temp_id = id;
+
 		bool done = false;
 		for (auto& ch_file : CH_files)
 		{
@@ -430,7 +438,7 @@ namespace MyTool
 												std::string temp = object->GetText();
 												//cout << temp << endl;
 												std::string copy_temp;
-												int index_first = temp.find(id);
+												int index_first = temp.find(temp_id);
 												if (index_first != -1) //если найден id
 												{
 													std::string text_new = ReplaceInCh(temp, attribute_to_change, value_to_change, action);
@@ -573,5 +581,178 @@ namespace MyTool
 		}
 
 	}
+
+	//////////////////////////////////////////////
+	
+
+	void ChangeOLOffsetToCHOffset()
+	{	
+		//найти в обжект либрари айди, сохранить xOffset, yOffset, обнулить их
+		std::string xOffset;
+		std::string yOffset;
+		ReplaceInCh = ReplaceInCHObjectTextIso;
+
+		for (auto& id : ch_attrib_ids)
+		{	
+			for (auto& obj_file : ObjLib_files)
+			{
+				bool brk = false;
+				tinyxml2::XMLDocument ObjectLibtary_doc;
+				ObjectLibtary_doc.LoadFile(obj_file.string().c_str());
+
+				tinyxml2::XMLElement* ObjectLibrarySchemeElement = ObjectLibtary_doc.FirstChildElement();
+				for (tinyxml2::XMLElement* Objects = ObjectLibrarySchemeElement->FirstChildElement(); Objects != NULL; Objects = Objects->NextSiblingElement())
+				{	
+					for (tinyxml2::XMLElement* item_node = Objects->FirstChildElement(); item_node != NULL; item_node = item_node->NextSiblingElement())
+					{	
+							if (item_node->Attribute("id") == id)
+							{	
+								auto layer = item_node->FirstChildElement();
+								xOffset = layer->Attribute("xOffset");
+								yOffset = layer->Attribute("yOffset");
+								//обнулили
+								layer->SetAttribute("xOffset", 0);
+								layer->SetAttribute("yOffset", 0);
+
+								if (reset_isobox)
+								{
+									IsoBox original_iso = GetOriginalIso(id);
+
+									layer->SetAttribute("xOffset", original_iso.xOffset);
+									layer->SetAttribute("yOffset", original_iso.yOffset);
+
+									xOffset = to_string(string_to_double(xOffset) - original_iso.xOffset);
+									yOffset = to_string(string_to_double(yOffset) - original_iso.yOffset);
+
+									layer->SetAttribute("xMin",original_iso.xMin);
+									layer->SetAttribute("yMin",original_iso.yMin);
+									layer->SetAttribute("zMin",original_iso.zMin);
+
+									layer->SetAttribute("xMax",original_iso.xMax);
+									layer->SetAttribute("yMax",original_iso.yMax);
+									layer->SetAttribute("zMax",original_iso.zMax);
+								}
+
+								ObjectLibtary_doc.SaveFile(obj_file.string().c_str());
+								
+								brk = true;
+								break;
+							}
+					}
+					if (brk) break;
+				}
+				
+			}
+			
+				xOffset = to_string(string_to_double(xOffset) / 2);
+
+				CH_ProcessAttributeBy(id, "x", xOffset, '-', ReplaceInCHObjectTextIso);
+				CH_ProcessAttributeBy(id, "y", xOffset, '+', ReplaceInCHObjectTextIso);
+
+				CH_ProcessAttributeBy(id, "x", yOffset, '-', ReplaceInCHObjectTextIso);
+				CH_ProcessAttributeBy(id, "y", yOffset, '-', ReplaceInCHObjectTextIso);
+
+		}
+		//for (auto& id : ch_attrib_ids)
+		//{
+		//	CH_ProcessAttributeBy(id, ch_attrib, ch_attrib_value, ch_attrib_operation, ReplaceInCHObjectTextIso);
+		//}
+
+	}
+
+	fs::path GetPathByTextureIdResources(std::string id)
+	{
+		std::string static_text = "/static/";
+
+		tinyxml2::XMLDocument Gamefield_Resources_doc;
+		Gamefield_Resources_doc.LoadFile(path_gamefield_resources.c_str());
+		tinyxml2::XMLElement* resources = Gamefield_Resources_doc.FirstChildElement();
+		fs::path root_path;
+
+
+		for (tinyxml2::XMLElement* Textures_group = resources->FirstChildElement(); Textures_group != NULL; Textures_group = Textures_group->NextSiblingElement())
+		{
+
+			if (Textures_group->Attribute("basePath") == nullptr)
+				continue;
+
+			std::string path_t = Textures_group->Attribute("basePath");
+
+				for (tinyxml2::XMLElement* sprite = Textures_group->FirstChildElement(); sprite != NULL; sprite = sprite->NextSiblingElement())
+				{
+					if (sprite->Attribute("id") == id)
+					{
+						root_path = path_base_mm;
+						root_path /= path_t;
+						root_path /= sprite->Attribute("path");
+						root_path.replace_extension(".png");
+						
+						return root_path;
+					}
+				}
+			
+		}
+	}
+
+	std::string GetLayerIdByObjectId(std::string object_id)
+	{
+		for (auto& obj_file : ObjLib_files)
+		{
+			tinyxml2::XMLDocument ObjectLibrary_doc;
+			ObjectLibrary_doc.LoadFile(obj_file.string().c_str());
+			tinyxml2::XMLElement* ObjectLibrarySchemeElement = ObjectLibrary_doc.FirstChildElement();
+
+			for (tinyxml2::XMLElement* objects_node = ObjectLibrarySchemeElement->FirstChildElement(); objects_node != NULL; objects_node = objects_node->NextSiblingElement())
+			{
+
+				for (tinyxml2::XMLElement* item_node = objects_node->FirstChildElement(); item_node != NULL; item_node = item_node->NextSiblingElement())
+				{
+					if (item_node->Attribute("id") == object_id)
+					{
+						auto layer_node = item_node->FirstChildElement();
+						return layer_node->Attribute("texture");
+					}
+				}
+			}
+
+		}
+	}
+
+	IsoBox GetOriginalIso(std::string id) //item id of ObjectLibrary
+	{	
+		//в ObjectLibrary найти id и имя леера
+		std::string layer_id = GetLayerIdByObjectId(id);
+		//в resources найти путь к текстуре по имени леера
+		fs::path texture_path = GetPathByTextureIdResources(layer_id);
+		
+		std::ifstream in(texture_path.string());
+		unsigned int width, height;
+
+		in.seekg(16);
+		in.read((char *)&width, 4);
+		in.read((char *)&height, 4);
+
+		width = ntohl(width);
+		height = ntohl(height);
+
+		IsoBox iso(-(width / 2), -(height / 8), -(width / 4), -(width / 4), 0, width / 4, width / 4, height - height / 8);
+
+		return iso;
+			//IsoBox(double xMin_, double yMin_, double zMin_, double xMax_, double yMax_, double zMax_)
+			//: xMin(xMin_), yMin(yMin_), zMin(zMin_), xMax(xMax_), yMax(yMax_), zMax(zMax_)
+
+		//Xml::SetAttribute(layer, "type", std::string("texture"));
+		//Xml::SetAttribute(layer, "name", std::string("texture"));
+		//Xml::SetAttribute(layer, "texture", data->id);
+		//Xml::SetAttribute(layer, "xOffset", -w / 2);
+		//Xml::SetAttribute(layer, "yOffset", -h / 8);
+		//Xml::SetAttribute(layer, "xMin", -w / 4);
+		//Xml::SetAttribute(layer, "yMin", -w / 4);
+		//Xml::SetAttribute(layer, "zMin", 0);
+		//Xml::SetAttribute(layer, "xMax", w / 4);
+		//Xml::SetAttribute(layer, "yMax", w / 4);
+		//Xml::SetAttribute(layer, "zMax", h - h / 8);
+	}
+
 }
 

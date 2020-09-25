@@ -72,6 +72,7 @@ namespace MyTool {
 	extern bool ch_attrib_dataid;
 	extern bool ch_attrib_skip_iso;
 	extern bool ch_attrib_all_objects;
+	extern bool ch_id_mask;
 
 	extern std::string ch_attrib;
 	extern std::string ch_attrib_value;
@@ -79,7 +80,8 @@ namespace MyTool {
 	extern std::string ch_attrib_step;
 
 	extern char ch_attrib_operation;
-
+	extern bool reset_isobox;
+	extern bool reset_offset;
 
 	extern bool cancelExecution;
 

@@ -949,7 +949,7 @@ void GetParticleEffectData()
 				std::string file_path = itr->path().string();
 				std::string file_name = itr->path().filename().stem().string();
 
-				ParticleEffect* part_eff = new ParticleEffect(std::move(file_name),std::move(file_path));
+				ParticleEffect* part_eff = new ParticleEffect(std::move(file_path),std::move(file_name));
 
 				for (; ParticleSystem != NULL; ParticleSystem = ParticleSystem->NextSiblingElement()) //определяем лееры эффекта
 				{
@@ -2293,4 +2293,5 @@ void DeleteNoLayersItem()
 		OL_items_deleted++;
 	}
 }
+
 }

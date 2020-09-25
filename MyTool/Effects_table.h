@@ -191,6 +191,10 @@ namespace MyTool {
 		}
 #pragma endregion
 
+	private: System::Void Effects_table_Shown(System::Object^  sender, System::EventArgs^  e)
+	{
+		this->load->Close();
+	}
 
 	private: System::Void EF_CreateDataTable()
 	{
@@ -211,7 +215,7 @@ namespace MyTool {
 		column->Unique = false;
 		this->EffectsDataTable->Columns->Add(column);
 
-		//2 Effect name
+		//2 Effect name path
 		column = gcnew DataColumn();
 		column->DataType = System::Type::GetType("System.String");
 		column->ColumnName = "EffectName";
@@ -219,13 +223,13 @@ namespace MyTool {
 		column->Unique = false;
 		this->EffectsDataTable->Columns->Add(column);
 
-		//3 path
-		column = gcnew DataColumn();
-		column->DataType = System::Type::GetType("System.String");
-		column->ColumnName = "Path";
-		column->ReadOnly = true;
-		column->Unique = false;
-		this->EffectsDataTable->Columns->Add(column);
+		////3 path
+		//column = gcnew DataColumn();
+		//column->DataType = System::Type::GetType("System.String");
+		//column->ColumnName = "Path";
+		//column->ReadOnly = true;
+		//column->Unique = false;
+		//this->EffectsDataTable->Columns->Add(column);
 
 		//4 textures in effect
 		column = gcnew DataColumn();
@@ -267,11 +271,11 @@ namespace MyTool {
 
 		row[0] = count;
 		row[1] = effect->partEff_to_delete;
-		row[2] = MRSHL_stdstr_TO_Str(effect->partEff_name); //имя
-		row[3] = MRSHL_stdstr_TO_Str(effect->partEff_string_path); //путь
-		row[4] = effect->partEff_ParticleEffectLayers.size(); //текстур в эффекте
-		row[5] = MRSHL_stdstr_TO_Str(effect->partEff_dead);	//мертвый ли эфеект
-		row[6] = MRSHL_stdstr_TO_Str(effect->partEff_exist_on_meta? "+" : "-"); //есть ли на мете
+		//row[2] = MRSHL_stdstr_TO_Str(effect->partEff_name); //имя
+		row[2] = MRSHL_stdstr_TO_Str(effect->partEff_string_path); //путь
+		row[3] = effect->partEff_ParticleEffectLayers.size(); //текстур в эффекте
+		row[4] = MRSHL_stdstr_TO_Str(effect->partEff_dead);	//мертвый ли эфеект
+		row[5] = MRSHL_stdstr_TO_Str(effect->partEff_exist_on_meta? "+" : "-"); //есть ли на мете
 
 		EffectsDataTable->Rows->Add(row);
 
@@ -554,14 +558,10 @@ namespace MyTool {
 
 	}
 
-	private: System::Void Effects_table_Shown(System::Object^  sender, System::EventArgs^  e) 
-	{
-		this->load->Close();
-	}
-
 	private: System::Void advancedDataGridViewEf_CellDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) 
 	{	
-		String^ effect_path = advancedDataGridViewEf->CurrentRow->Cells[3]->Value->ToString() + "/" + advancedDataGridViewEf->CurrentRow->Cells[2]->Value->ToString();
+		//String^ effect_path = advancedDataGridViewEf->CurrentRow->Cells[3]->Value->ToString() + "/" + advancedDataGridViewEf->CurrentRow->Cells[2]->Value->ToString();
+		String^ effect_path = advancedDataGridViewEf->CurrentRow->Cells[2]->Value->ToString();
 		eff_details = gcnew Effect_detail(effect_path);
 		eff_details->Show();
 	}

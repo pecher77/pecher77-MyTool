@@ -23,8 +23,8 @@ namespace MyTool {
 	std::list<std::string>					CH_files;
 	std::list<boost::filesystem::path>		cluster_folders;
 	std::vector<boost::filesystem::path>	ObjLib_files;
-	std::string chosen_repair;
-	std::string chosen_step;
+	std::string chosen_repair = "not chosen";
+	std::string chosen_step = "not chosen";
 	std::vector<std::string>			repairs;
 	std::vector<std::string>			steps;
 
@@ -33,6 +33,10 @@ namespace MyTool {
 	bool ch_attrib_dataid = true;
 	bool ch_attrib_skip_iso = false;
 	bool ch_attrib_all_objects = false;
+	bool ch_id_mask = false;
+
+	bool reset_isobox = false;
+	bool reset_offset = false;
 
 	std::string ch_attrib;
 	std::string ch_attrib_value;

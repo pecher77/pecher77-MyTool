@@ -132,6 +132,124 @@ namespace MyTool {
 		}
 #pragma endregion
 
+	private: System::Void Effect_detail_Load(System::Object^  sender, System::EventArgs^  e)
+	{
+		this->EffDetailBind->ListChanged += gcnew System::ComponentModel::ListChangedEventHandler(this, &Effect_detail::SBind_ListChanged);
+		Eff_detail_Fill_data();
+		//ColorDataGrid(false);
+
+	}
+	
+	private: System::Void Eff_detail_Fill_data()
+	{
+
+		Eff_Detail_CreateDataTable();
+		String^ s = effect_path;
+		std::string str_path = MRSHL_Str_TO_stdstr(s);
+		fs::path eff = str_path;
+
+		ParticleEffect* effect = FindEffectByPath(eff, particle_effects_XML);
+
+		label_effect_name->Text = MRSHL_stdstr_TO_Str(effect->partEff_name);
+
+
+
+		int count = 0;
+		for (auto eff_layer : effect->partEff_ParticleEffectLayers)
+		{
+			count++;
+			DataRow^ row = EffectDataTable->NewRow();
+
+			row[0] = count;
+			if (!eff_layer->effectLayer_file_exist)
+				row[1] = GetImageForData("nofile.png");
+			else
+				row[1] = GetImageForData(MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path)); //картинка
+			row[2] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path); //имя
+
+			//row[3] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path); //путь
+
+			EffectDataTable->Rows->Add(row);
+
+		}
+
+		EffDetailBind->DataSource = EffectDataTable;
+		advancedDataGridView1->DataSource = EffDetailBind;
+
+
+
+
+		/*DataGridViewTextBoxColumn^ column_path = (DataGridViewTextBoxColumn^)advancedDataGridView1->Columns[3];
+		column_path->AutoSizeMode = DataGridViewAutoSizeColumnsMode::DisplayedCells;
+		column_path->DefaultCellStyle->WrapMode = DataGridViewTriState::True;*/
+
+		//advancedDataGridView1->AutoResizeColumn(0);
+		//advancedDataGridView1->AutoResizeColumn(2);
+		//advancedDataGridView1->AutoResizeColumn(3);
+		//advancedDataGridView1->AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode::AllCells;
+		//advancedDataGridView1->Columns[2]->AutoSizeMode = DataGridViewAutoSizeColumnMode::DisplayedCells;
+
+		advancedDataGridView1->Columns[2]->AutoSizeMode = DataGridViewAutoSizeColumnMode::DisplayedCells;
+		advancedDataGridView1->Columns[2]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
+
+		advancedDataGridView1->Columns[1]->Width = 300;
+		advancedDataGridView1->AutoResizeColumn(0);
+		advancedDataGridView1->AutoResizeColumn(2);
+		//advancedDataGridView1->AutoResizeColumn(3);
+		DataGridViewImageColumn^ column = (DataGridViewImageColumn^)advancedDataGridView1->Columns[1];
+		column->ImageLayout = DataGridViewImageCellLayout::Zoom;
+
+		advancedDataGridView1->Columns[2]->AutoSizeMode = DataGridViewAutoSizeColumnMode::Fill;
+		advancedDataGridView1->DisableFilterAndSort(advancedDataGridView1->Columns[1]);
+
+		//кол-во тотал
+		count = this->EffDetailBind->List->Count;
+		std::stringstream is;
+		is << count;
+		std::string s_count;
+		is >> s_count;
+		s_count = "Total textures: " + s_count;
+		label_total_effects->Text = MRSHL_stdstr_TO_Str(s_count);
+
+	}
+	
+		private: System::Void Eff_Detail_CreateDataTable()
+		{
+			DataColumn^ column;
+			//0 number
+			column = gcnew DataColumn();
+			column->DataType = System::Type::GetType("System.Int32");
+			column->ColumnName = "Num";
+			column->ReadOnly = false;
+			column->Unique = false;
+			this->EffectDataTable->Columns->Add(column);
+
+			//1 Image
+			column = gcnew DataColumn();
+			column->DataType = System::Type::GetType("System.Byte[]");//System.Byte[]
+			column->ColumnName = "Texture";
+			column->ReadOnly = true;
+			column->Unique = false;
+			this->EffectDataTable->Columns->Add(column);
+
+			//2 name
+			column = gcnew DataColumn();
+			column->DataType = System::Type::GetType("System.String");
+			column->ColumnName = "Filename";
+			column->ReadOnly = true;
+			column->Unique = false;
+			this->EffectDataTable->Columns->Add(column);
+
+			////3 path
+			//column = gcnew DataColumn();
+			//column->DataType = System::Type::GetType("System.String");
+			//column->ColumnName = "Path";
+			//column->ReadOnly = true;
+			//column->Unique = false;
+			//this->EffectDataTable->Columns->Add(column);
+
+		}
+
 	public: array<System::Byte>^ GetImageForData(String^ path)
 	{
 
@@ -161,123 +279,9 @@ namespace MyTool {
 		return ms->ToArray();
 	}
 
-	private: System::Void Eff_Detail_CreateDataTable()
-	{
-		DataColumn^ column;
-		//0 number
-		column = gcnew DataColumn();
-		column->DataType = System::Type::GetType("System.Int32");
-		column->ColumnName = "Num";
-		column->ReadOnly = false;
-		column->Unique = false;
-		this->EffectDataTable->Columns->Add(column);
 
-		//1 Image
-		column = gcnew DataColumn();
-		column->DataType = System::Type::GetType("System.Byte[]");//System.Byte[]
-		column->ColumnName = "Texture";
-		column->ReadOnly = true;
-		column->Unique = false;
-		this->EffectDataTable->Columns->Add(column);
 
-		//2 name
-		column = gcnew DataColumn();
-		column->DataType = System::Type::GetType("System.String");
-		column->ColumnName = "Filename";
-		column->ReadOnly = true;
-		column->Unique = false;
-		this->EffectDataTable->Columns->Add(column);
 
-		//3 path
-		column = gcnew DataColumn();
-		column->DataType = System::Type::GetType("System.String");
-		column->ColumnName = "Path";
-		column->ReadOnly = true;
-		column->Unique = false;
-		this->EffectDataTable->Columns->Add(column);
-
-	}
-
-	private: System::Void Eff_detail_Fill_data()
-	{
-
-		Eff_Detail_CreateDataTable();
-		String^ s = effect_path;
-		std::string str_path = MRSHL_Str_TO_stdstr(s);
-		fs::path eff = str_path;
-
-		ParticleEffect* effect = FindEffectByPath(eff, particle_effects_XML);
-
-		label_effect_name->Text = MRSHL_stdstr_TO_Str(effect->partEff_name);
-
-		
-
-		int count = 0;
-		for (auto eff_layer : effect->partEff_ParticleEffectLayers)
-		{
-			count++;
-			DataRow^ row = EffectDataTable->NewRow();
-
-			row[0] = count;
-			if (eff_layer->effectLayer_file_exist)
-				row[1] = GetImageForData("nofile.png");
-			else
-				row[1] = GetImageForData(MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path)); //картинка
-			row[2] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path); //имя
-
-			row[3] = MRSHL_stdstr_TO_Str(eff_layer->effectLayer_path); //путь
-
-			EffectDataTable->Rows->Add(row);
-
-		}
-
-		EffDetailBind->DataSource = EffectDataTable;
-		advancedDataGridView1->DataSource = EffDetailBind;
-		
-
-		
-
-		/*DataGridViewTextBoxColumn^ column_path = (DataGridViewTextBoxColumn^)advancedDataGridView1->Columns[3];
-		column_path->AutoSizeMode = DataGridViewAutoSizeColumnsMode::DisplayedCells;
-		column_path->DefaultCellStyle->WrapMode = DataGridViewTriState::True;*/
-
-		//advancedDataGridView1->AutoResizeColumn(0);
-		//advancedDataGridView1->AutoResizeColumn(2);
-		//advancedDataGridView1->AutoResizeColumn(3);
-		//advancedDataGridView1->AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode::AllCells;
-		//advancedDataGridView1->Columns[2]->AutoSizeMode = DataGridViewAutoSizeColumnMode::DisplayedCells;
-		
-		advancedDataGridView1->Columns[3]->AutoSizeMode = DataGridViewAutoSizeColumnMode::DisplayedCells;
-		advancedDataGridView1->Columns[3]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
-
-		advancedDataGridView1->Columns[1]->Width = 300;
-		advancedDataGridView1->AutoResizeColumn(0);
-		advancedDataGridView1->AutoResizeColumn(2);
-		//advancedDataGridView1->AutoResizeColumn(3);
-		DataGridViewImageColumn^ column = (DataGridViewImageColumn^)advancedDataGridView1->Columns[1];
-		column->ImageLayout = DataGridViewImageCellLayout::Zoom;
-
-		advancedDataGridView1->Columns[3]->AutoSizeMode = DataGridViewAutoSizeColumnMode::Fill;
-		advancedDataGridView1->DisableFilterAndSort(advancedDataGridView1->Columns[1]);
-
-		//кол-во тотал
-		count = this->EffDetailBind->List->Count;
-		std::stringstream is;
-		is << count;
-		std::string s_count;
-		is >> s_count;
-		s_count = "Total textures: " + s_count;
-		label_total_effects->Text = MRSHL_stdstr_TO_Str(s_count);
-
-	}
-
-	private: System::Void Effect_detail_Load(System::Object^  sender, System::EventArgs^  e) 
-	{
-		this->EffDetailBind->ListChanged += gcnew System::ComponentModel::ListChangedEventHandler(this, &Effect_detail::SBind_ListChanged);
-		Eff_detail_Fill_data();
-		//ColorDataGrid(false);
-
-	}
 
 	//private: System::Void ColorDataGrid(Boolean problem)
 	//{
@@ -300,6 +304,8 @@ namespace MyTool {
 	//	}
 	//}
 
+
+	//событие изменения списка
 	private: System::Void SBind_ListChanged(System::Object^ sender, ListChangedEventArgs^ e)
 	{
 		int count = this->EffDetailBind->List->Count;
